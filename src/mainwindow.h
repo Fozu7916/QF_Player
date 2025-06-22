@@ -21,6 +21,8 @@ private slots:
 
     void on_playOrStopButton_clicked();
 
+    void on_addButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     Player *m_player;

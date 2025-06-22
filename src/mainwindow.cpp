@@ -28,3 +28,11 @@ void MainWindow::on_playOrStopButton_clicked()
     }
 }
 
+
+void MainWindow::on_addButton_clicked()
+{
+    Track new_track
+        ;
+    TrackLists.push_back(new_track);
+}
+
