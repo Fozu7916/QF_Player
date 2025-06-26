@@ -10,6 +10,7 @@
 #include <QFile>
 #include <QTextStream>
 #include "../changebackground.h"
+#include "../controller/playercontroller.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -17,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_player(new Player(this))
     , isPlayed(false)
     , sliderTimer(nullptr)
+    , playerController(new PlayerController())
 {
     ui->setupUi(this);
     changebackground(this,":/images/fone.jpg");
@@ -28,43 +30,17 @@ MainWindow::MainWindow(QWidget *parent)
         ui->volume->setText(QString::number(value));
         m_player->setVolume(value);
     });
-    loadTrackList();
+    playerController->loadTracks();
+    for (const auto& track : playerController->getTracks()) {
+        ui->TrackLists->addItem(QFileInfo(track.getPath()).fileName());
+    }
 }
 
 MainWindow::~MainWindow()
 {
-    saveTrackList();
+    playerController->saveTracks();
+    delete playerController;
     delete ui;
-}
-
-void MainWindow::saveTrackList() {
-    QFile file("tracks.txt");
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream out(&file);
-        for (const auto& track : TrackLists) {
-            out << track.getPath() << ";" << track.getLength() << "\n";
-        }
-        file.close();
-    }
-}
-
-void MainWindow::loadTrackList() {
-    QFile file("tracks.txt");
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QTextStream in(&file);
-        while (!in.atEnd()) {
-            QString line = in.readLine();
-            if (!line.isEmpty()) {
-                QStringList parts = line.split(";");
-                QString path = parts.value(0);
-                int length = parts.value(1).toInt();
-                Track new_track(path, length);
-                TrackLists.push_back(new_track);
-                ui->TrackLists->addItem(QFileInfo(path).fileName());
-            }
-        }
-        file.close();
-    }
 }
 
 void MainWindow::on_playOrStopButton_clicked()

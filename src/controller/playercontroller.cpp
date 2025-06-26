@@ -2,7 +2,7 @@
 #include <QFile>
 #include <QTextStream>
 
-PlayerController::PlayerController(){};
+PlayerController::PlayerController() {}
 
 void PlayerController::loadTracks() {
     QFile file("tracks.txt");
@@ -31,5 +31,19 @@ void PlayerController::saveTracks() {
             out << track.getPath() << ";" << track.getLength() << "\n";
         }
         file.close();
+    }
+}
+
+const std::vector<Track>& PlayerController::getTracks() const {
+    return m_tracks;
+}
+
+void PlayerController::addTrack(const Track& track) {
+    m_tracks.push_back(track);
+}
+
+void PlayerController::removeTrack(int index) {
+    if (index >= 0 && index < static_cast<int>(m_tracks.size())) {
+        m_tracks.erase(m_tracks.begin() + index);
     }
 }

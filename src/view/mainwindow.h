@@ -37,6 +37,7 @@ private:
     int currentTrackIndex = -1;
     std::vector<Track> TrackLists;
     QTimer *sliderTimer;
+    PlayerController* playerController;
     void saveTrackList();
     void loadTrackList();
 };

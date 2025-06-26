@@ -41,6 +41,8 @@ set(PROJECT_SOURCES
     src/view/mainwindow.cpp
     src/view/mainwindow.h
     src/view/mainwindow.ui
+    src/controller/playercontroller.h
+    src/controller/playercontroller.cpp
     resources/resources.qrc
 )
 
