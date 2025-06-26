@@ -7,11 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>467</width>
-    <height>600</height>
+    <height>614</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Плеер музыки прям вообще бомба</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="horizontalLayoutWidget">
@@ -71,8 +74,8 @@
      <rect>
       <x>190</x>
       <y>400</y>
-      <width>41</width>
-      <height>41</height>
+      <width>51</width>
+      <height>51</height>
      </rect>
     </property>
     <property name="font">
@@ -89,8 +92,8 @@
      <rect>
       <x>250</x>
       <y>400</y>
-      <width>41</width>
-      <height>41</height>
+      <width>51</width>
+      <height>51</height>
      </rect>
     </property>
     <property name="font">
@@ -107,8 +110,8 @@
      <rect>
       <x>310</x>
       <y>400</y>
-      <width>41</width>
-      <height>41</height>
+      <width>51</width>
+      <height>51</height>
      </rect>
     </property>
     <property name="font">
@@ -129,6 +132,9 @@
       <height>581</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgba(247, 247, 247, 100);</string>
+    </property>
    </widget>
    <widget class="QSlider" name="volumeSlider">
     <property name="geometry">
@@ -138,6 +144,9 @@
       <width>16</width>
       <height>160</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
     </property>
     <property name="orientation">
      <enum>Qt::Orientation::Vertical</enum>

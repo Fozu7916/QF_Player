@@ -9,6 +9,7 @@
 #include <QString>
 #include <QFile>
 #include <QTextStream>
+#include "../changebackground.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -18,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     , sliderTimer(nullptr)
 {
     ui->setupUi(this);
-    
+    changebackground(this,":/images/fone.jpg");
     ui->volumeSlider->setRange(0, 100);
     ui->volumeSlider->setValue(50);
     ui->volume->setText(QString::number(50));
