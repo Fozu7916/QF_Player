@@ -11,8 +11,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Multimedia)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Multimedia)
 
-# Указываем пути к mpv (важно использовать абсолютные пути)
+# Указываем пути к mpv
 set(MPV_DIR "${CMAKE_SOURCE_DIR}/mpv")
 set(MPV_INCLUDE_DIR "${MPV_DIR}/include")
 set(MPV_LIB_DIR "${MPV_DIR}")
@@ -36,17 +38,17 @@ target_include_directories(mpv INTERFACE "${MPV_INCLUDE_DIR}")
 
 set(PROJECT_SOURCES
     src/main.cpp
-    src/mainwindow.cpp
-    src/mainwindow.h
-    src/mainwindow.ui
+    src/view/mainwindow.cpp
+    src/view/mainwindow.h
+    src/view/mainwindow.ui
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(TextRedactor
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        src/player.h src/player.cpp
-        src/track.h src/track.cpp
+        src/player/player.h src/player/player.cpp
+        src/model/track.h src/model/track.cpp
 
     )
 else()
@@ -64,6 +66,7 @@ endif()
 # Линкуем как Qt, так и mpv
 target_link_libraries(TextRedactor PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Multimedia
     mpv
 )
 
