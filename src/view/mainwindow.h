@@ -20,8 +20,14 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+public slots:
+    void addTrackToList(const QString& name);
+    void DeleteTrackFromList(int index);
+    void setCurrentRow(int index);
+    void onPlayOrStopUI(bool isPlaying);
+    
 private slots:
-
+    int getduration(QString filePath);
     void on_playOrStopButton_clicked();
     void on_addButton_clicked();
     void on_TrackLists_itemClicked(QListWidgetItem *item);
@@ -29,17 +35,12 @@ private slots:
     void on_nextButton_clicked();
     void on_prevButton_clicked();
     void on_horizontalSlider_sliderMoved(int position);
-
 private:
     Ui::MainWindow *ui;
-    Player *m_player;
-    bool isPlayed;
-    int currentTrackIndex = -1;
     std::vector<Track> TrackLists;
     QTimer *sliderTimer;
-    PlayerController* playerController;
-    void saveTrackList();
-    void loadTrackList();
+    std::unique_ptr<PlayerController> playerController;
+
 };
 
 #endif // MAINWINDOW1_H
