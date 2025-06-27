@@ -40,6 +40,7 @@ private:
     std::unique_ptr<Player> m_player;
     bool isPlayed;
     int currentTrackIndex = -1;
+    void playTrackAtIndex(int index);
 };
 
 #endif // PLAYERCONTROLLER_H

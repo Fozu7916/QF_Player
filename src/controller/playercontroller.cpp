@@ -37,16 +37,15 @@ void PlayerController::saveTracks() {
     QFile file("tracks.txt");
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
-        for (const auto& track : m_tracks) {
-            out << track.getPath() << ";" << track.getLength() << "\n";
-        }
+        for (const auto& track : m_tracks) { out << track.getPath() << ";" << track.getLength() << "\n"; }
         file.close();
     }
 }
 
+void PlayerController::deleteTrack(){
+    if(m_tracks.empty()) return;
+    if(currentTrackIndex < 0) return;
 
-void PlayerController::deleteTrack()
-{
     m_player->pause();
     isPlayed = false;
     int deletedIndex = currentTrackIndex;
@@ -55,6 +54,64 @@ void PlayerController::deleteTrack()
     emit trackDeleted(deletedIndex);
 }
 
+void PlayerController::setVolume(int value) {
+    if (m_player) m_player->setVolume(value);
+}
+
+void PlayerController::playnext(){
+    if(m_tracks.empty()) return;
+    if(currentTrackIndex + 1 <= m_tracks.size() - 1){
+        m_player->pause();
+        currentTrackIndex++;
+    }else{
+        currentTrackIndex = 0;
+    }
+    playTrackAtIndex(currentTrackIndex);
+}
+
+void PlayerController::playprev(){
+    if(m_tracks.empty()) return;
+    if(currentTrackIndex - 1 >= 0){
+        m_player->pause();
+        currentTrackIndex--;
+    }else{
+        currentTrackIndex = m_tracks.size() - 1;
+    }
+    playTrackAtIndex(currentTrackIndex);
+}
+
+void PlayerController::playTrackAtIndex(int index) {
+    emit setCurrentRow(index);
+    m_player->loadFile(m_tracks[index].getPath());
+    m_player->play();
+    isPlayed = true;
+}
+
+void PlayerController::playOrStop(){
+    if (currentTrackIndex < 0 || currentTrackIndex >= m_tracks.size()) return;
+
+    if (!isPlayed) {
+        m_player->play();
+        isPlayed = true;
+        emit playOrStopUI(true);
+    } else {
+        m_player->pause();
+        isPlayed = false;
+        emit playOrStopUI(false);
+    }
+}
+
+void PlayerController::OnItemClicked(int index){
+        if (index >= 0 && index < m_tracks.size()) {
+        currentTrackIndex = index;
+        m_player->loadFile(m_tracks[index].getPath());
+        m_player->play();
+        isPlayed = true;
+        emit setCurrentRow(currentTrackIndex);
+        }
+}
+
+// Геттеры и сеттеры
 const std::vector<Track>& PlayerController::getTracks() const {
     return m_tracks;
 }
@@ -68,10 +125,7 @@ const Track& PlayerController::getTrack(int index) const {
 }
 
 void PlayerController::removeTrack(int index) {
-    if (index >= 0 && index < static_cast<int>(m_tracks.size())) {
-        m_tracks.erase(m_tracks.begin() + index);
-    }
-    emit setCurrentRow(currentTrackIndex -1);
+    if (index >= 0 && index < static_cast<int>(m_tracks.size())) { m_tracks.erase(m_tracks.begin() + index);}
 }
 
 void PlayerController::clearTracks() {
@@ -86,68 +140,8 @@ int PlayerController::getCurrentIndex() const {
     return currentTrackIndex;
 }
 
-void PlayerController::OnItemClicked(int index){
-        if (index >= 0 && index < m_tracks.size()) {
-        currentTrackIndex = index;
-        m_player->loadFile(m_tracks[index].getPath());
-        m_player->play();
-        isPlayed = true;
-        emit setCurrentRow(currentTrackIndex);
-        }
-}
-
 Player* PlayerController::getPlayer() const {
     return m_player.get();
 }
 
-void PlayerController::playprev(){
-    if(currentTrackIndex  - 1  >= 0){
-        m_player->pause();
-        currentTrackIndex--;
-        emit setCurrentRow(currentTrackIndex);
-        m_player->loadFile(m_tracks[currentTrackIndex].getPath());
-        m_player->play();
-        isPlayed = true;
-    }else{
-        currentTrackIndex = m_tracks.size() - 1;
-        emit setCurrentRow(currentTrackIndex);
-        m_player->loadFile(m_tracks[currentTrackIndex].getPath());
-        m_player->play();
-        isPlayed = true;
-    }
 
-}
-
-void PlayerController::playnext(){
-    if(currentTrackIndex + 1 <= m_tracks.size() - 1){
-        m_player->pause();
-        currentTrackIndex++;
-        emit setCurrentRow(currentTrackIndex);
-        m_player->loadFile(m_tracks[currentTrackIndex].getPath());
-        m_player->play();
-        isPlayed = true;
-    }else{
-        currentTrackIndex = 0;
-        emit setCurrentRow(currentTrackIndex);
-        m_player->loadFile(m_tracks[currentTrackIndex].getPath());
-        m_player->play();
-        isPlayed = true;
-    }
-}
-
-void PlayerController::playOrStop()
-{
-    if (currentTrackIndex < 0 || currentTrackIndex >= m_tracks.size()) return;
-    if (!isPlayed) {
-        m_player->play();
-        isPlayed = true;
-        emit playOrStopUI(true);
-    } else {
-        m_player->pause();
-        isPlayed = false;
-        emit playOrStopUI(false);
-    }
-}
-void PlayerController::setVolume(int value) {
-    if (m_player) m_player->setVolume(value);
-}

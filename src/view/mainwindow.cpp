@@ -36,49 +36,53 @@ MainWindow::MainWindow(QWidget *parent)
     playerController->loadTracks();
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow(){
     playerController->saveTracks();
     delete ui;
 }
 
-void MainWindow::on_playOrStopButton_clicked()
-{
+void MainWindow::on_playOrStopButton_clicked(){
     playerController->playOrStop();
 }
 
-void MainWindow::on_addButton_clicked()
-{
+void MainWindow::on_addButton_clicked(){
     QString filePath = QFileDialog::getOpenFileName(this, "Выберите трек", "", "Аудио файлы (*.mp3 *.wav *.flac)");
     if (!filePath.isEmpty()) playerController->addTrack(filePath,getduration(filePath));
-    
 }
 
+int MainWindow::getduration(QString filePath){
+        QMediaPlayer mediaPlayer;
+        mediaPlayer.setSource(QUrl::fromLocalFile(filePath));
+        QEventLoop loop;
+        QObject::connect(&mediaPlayer, &QMediaPlayer::durationChanged, &loop, &QEventLoop::quit);
+        mediaPlayer.play();
+        loop.exec();
+        qint64 durationMs = mediaPlayer.duration();
+        mediaPlayer.stop();
+        int durationSec = static_cast<int>(durationMs / 1000);
+        return durationSec;
+}
 
-void MainWindow::on_deleteButton_clicked()
-{
+void MainWindow::on_deleteButton_clicked(){
     playerController->deleteTrack();
 }
 
 void MainWindow::on_nextButton_clicked(){
- playerController->playnext();
+    playerController->playnext();
 }
 
 void MainWindow::on_prevButton_clicked(){
- playerController->playprev();
+    playerController->playprev();
 }
 
-void MainWindow::on_horizontalSlider_sliderMoved(int position)
-{
+void MainWindow::on_horizontalSlider_sliderMoved(int position){
     playerController->getPlayer()->setPosition(position);
     int min = position / 60;
     int sec = position % 60;
     ui->time->setText(QString::asprintf("%d:%02d", min, sec));
 }
 
-
-void MainWindow::on_TrackLists_itemClicked(QListWidgetItem *item)
-{
+void MainWindow::on_TrackLists_itemClicked(QListWidgetItem *item){
         int index = ui->TrackLists->row(item);
         playerController->OnItemClicked(index);
 
@@ -95,6 +99,7 @@ void MainWindow::on_TrackLists_itemClicked(QListWidgetItem *item)
                 }
             });
         }
+
         sliderTimer->start(500);
 }
 
@@ -120,17 +125,4 @@ void MainWindow::onPlayOrStopUI(bool isPlaying) {
     } else {
         ui->playOrStopButton->setText("▶");
     }
-}
-
-int MainWindow::getduration(QString filePath){
-        QMediaPlayer mediaPlayer;
-        mediaPlayer.setSource(QUrl::fromLocalFile(filePath));
-        QEventLoop loop;
-        QObject::connect(&mediaPlayer, &QMediaPlayer::durationChanged, &loop, &QEventLoop::quit);
-        mediaPlayer.play();
-        loop.exec();
-        qint64 durationMs = mediaPlayer.duration();
-        mediaPlayer.stop();
-        int durationSec = static_cast<int>(durationMs / 1000);
-        return durationSec;
 }
