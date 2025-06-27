@@ -1,4 +1,4 @@
-# TextRedactor — Музыкальный плеер на Qt
+# QF_player — Музыкальный плеер на Qt
 
 ![Qt](https://img.shields.io/badge/Qt-6.x-green)
 ![C++](https://img.shields.io/badge/C%2B%2B-17-blue)
@@ -13,7 +13,8 @@ TextRedactor — это простой, но функциональный муз
 - Автоматически подстраивать интерфейс под размер окна
 
 ## Скриншот
-![Скриншот](screenshot.png)
+![Скриншот](![image](https://github.com/user-attachments/assets/d4934e01-f8f6-4576-bd9a-130eba39b1db)
+)
 
 ## Как собрать
 
