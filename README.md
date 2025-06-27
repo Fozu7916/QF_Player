@@ -13,7 +13,7 @@ TextRedactor — это простой, но функциональный муз
 - Автоматически подстраивать интерфейс под размер окна
 
 ## Скриншот
-![Скриншот](![image](https://github.com/user-attachments/assets/d4934e01-f8f6-4576-bd9a-130eba39b1db)
+![Скриншот](https://github.com/user-attachments/assets/d4934e01-f8f6-4576-bd9a-130eba39b1db)
 )
 
 ## Как собрать
