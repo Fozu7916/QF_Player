@@ -52,8 +52,4 @@ TextRedactor/
 └── ...
 ```
 
-## Авторы
-- [Ваше имя](https://github.com/yourname)
 
-## Лицензия
-MIT
