@@ -43,7 +43,7 @@ void PlayerController::saveTracks(QString filename) {
 
 void PlayerController::deleteTrack(){
     if (tracks.empty()) return;
-    if ( index >= 0 and index < tracks.size()){
+    if ( currentTrackIndex >= 0 and currentTrackIndex < tracks.size()){
         player->pause();
         isPlayed = false;
         int deletedIndex = currentTrackIndex;
@@ -52,7 +52,7 @@ void PlayerController::deleteTrack(){
         emit trackDeleted(deletedIndex);
     } else {
         qWarning() << "Невозможно воспроизвести трек, проблема с индексом";
-        player->setCurrentIndex(-1);
+        setCurrentIndex(-1);
     }
 }
 
@@ -91,7 +91,7 @@ void PlayerController::playTrackAtIndex(int index) {
         isPlayed = true;
     } else {
         qWarning() << "Невозможно воспроизвести трек, проблема с индексом";
-        player->setCurrentIndex(-1);
+        setCurrentIndex(-1);
     }
 }
 
@@ -108,7 +108,7 @@ void PlayerController::playOrStop(){
         }
     } else {
         qWarning() << "Невозможно воспроизвести трек, проблема с индексом";
-        player->setCurrentIndex(-1);
+        setCurrentIndex(-1);
         return;
     }
 }
@@ -122,7 +122,7 @@ void PlayerController::onItemClicked(int index){
             emit setCurrentRow(currentTrackIndex);
         } else {
             qWarning() << "Невозможно выбрать трек, проблема с индексом";
-            player->setCurrentIndex(-1);
+            setCurrentIndex(-1);
         }
 }
 

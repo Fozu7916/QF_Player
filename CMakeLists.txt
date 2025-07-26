@@ -105,3 +105,5 @@ install(TARGETS TextRedactor
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(TextRedactor)
 endif()
+
+add_subdirectory(tests)
