@@ -52,4 +52,32 @@ TextRedactor/
 └── ...
 ```
 
+## Тестирование
+
+Тесты находятся в папке `tests/` и написаны с использованием Qt Test.
+
+### Как запустить тесты
+
+1. Соберите проект с помощью CMake, как указано выше.
+2. В папке `build/tests/` (или аналогичной для вашей сборки) будут созданы исполняемые файлы тестов:
+   - `test_player.exe`
+   - `test_playercontroller.exe`
+   - `test_track.exe`
+3. Запустите каждый тестовый исполняемый файл вручную или с помощью скрипта:
+   ```bash
+   ./test_player.exe
+   ./test_playercontroller.exe
+   ./test_track.exe
+   ```
+   или на Linux/Mac:
+   ```bash
+   ./test_player
+   ./test_playercontroller
+   ./test_track
+   ```
+
+## Лицензия
+
+Этот проект распространяется под лицензией MIT. См. файл [LICENSE](LICENSE) для подробностей.
+
 
