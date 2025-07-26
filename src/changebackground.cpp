@@ -5,10 +5,10 @@
 #include <QSize>
 #include <Qt>
 
-void changebackground(QMainWindow *here,QString backgroundpath){
+void changebackground(QMainWindow *window,QString backgroundpath){
     QPixmap bkgnd(backgroundpath);
-    QPixmap scaledBkgnd = bkgnd.scaled(here->size(), Qt::KeepAspectRatioByExpanding);
+    QPixmap scaledBkgnd = bkgnd.scaled(window->size(), Qt::KeepAspectRatioByExpanding);
     QPalette pal;
     pal.setBrush(QPalette::Window, scaledBkgnd);
-    here->setPalette(pal);
+    window->setPalette(pal);
 }

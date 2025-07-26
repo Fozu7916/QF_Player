@@ -22,12 +22,12 @@ public:
 
 public slots:
     void addTrackToList(const QString& name);
-    void DeleteTrackFromList(int index);
+    void deleteTrackFromList(int index);
     void setCurrentRow(int index);
     void onPlayOrStopUI(bool isPlaying);
     
 private slots:
-    int getduration(QString filePath);
+    int getDuration(QString filePath);
     void on_playOrStopButton_clicked();
     void on_addButton_clicked();
     void on_TrackLists_itemClicked(QListWidgetItem *item);
@@ -37,13 +37,13 @@ private slots:
     void on_horizontalSlider_sliderMoved(int position);
 private:
     Ui::MainWindow *ui;
-    std::vector<Track> TrackLists;
+    std::vector<Track> trackList;
     QTimer *sliderTimer;
     std::unique_ptr<PlayerController> playerController;
 
 };
 
-#endif // MAINWINDOW1_H
+#endif // MAINWINDOW_H
 
 
 

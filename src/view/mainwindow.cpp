@@ -12,6 +12,9 @@
 #include "../changebackground.h"
 #include "../controller/playercontroller.h"
 
+const int DEFAULT_VOLUME = 50;
+const QString PLAYLIST_FILENAME = "tracks.txt";
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -20,24 +23,25 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     changebackground(this,":/images/fone.jpg");
+
     ui->volumeSlider->setRange(0, 100);
-    ui->volumeSlider->setValue(50);
-    ui->volume->setText(QString::number(50));
+    ui->volumeSlider->setValue(DEFAULT_VOLUME);
+    ui->volume->setText(QString::number(DEFAULT_VOLUME));
+
     connect(ui->volumeSlider, &QSlider::valueChanged, this, [this](int value){
         ui->volume->setText(QString::number(value));
         playerController->setVolume(value);
     });
-
-    connect(playerController.get(), &PlayerController::trackDeleted, this, &MainWindow::DeleteTrackFromList);
+    connect(playerController.get(), &PlayerController::trackDeleted, this, &MainWindow::deleteTrackFromList);
     connect(playerController.get(), &PlayerController::trackLoaded, this, &MainWindow::addTrackToList);
     connect(playerController.get(), &PlayerController::setCurrentRow, this, &MainWindow::setCurrentRow);
     connect(playerController.get(), &PlayerController::playOrStopUI, this, &MainWindow::onPlayOrStopUI);
 
-    playerController->loadTracks();
+    playerController->loadTracks(PLAYLIST_FILENAME);
 }
 
 MainWindow::~MainWindow(){
-    playerController->saveTracks();
+    playerController->saveTracks(PLAYLIST_FILENAME);
     delete ui;
 }
 
@@ -47,10 +51,10 @@ void MainWindow::on_playOrStopButton_clicked(){
 
 void MainWindow::on_addButton_clicked(){
     QString filePath = QFileDialog::getOpenFileName(this, "Выберите трек", "", "Аудио файлы (*.mp3 *.wav *.flac)");
-    if (!filePath.isEmpty()) playerController->addTrack(filePath,getduration(filePath));
+    if (!filePath.isEmpty()) playerController->addTrack(filePath,getDuration(filePath));
 }
 
-int MainWindow::getduration(QString filePath){
+int MainWindow::getDuration(QString filePath){
         QMediaPlayer mediaPlayer;
         mediaPlayer.setSource(QUrl::fromLocalFile(filePath));
         QEventLoop loop;
@@ -68,11 +72,11 @@ void MainWindow::on_deleteButton_clicked(){
 }
 
 void MainWindow::on_nextButton_clicked(){
-    playerController->playnext();
+    playerController->playNext();
 }
 
 void MainWindow::on_prevButton_clicked(){
-    playerController->playprev();
+    playerController->playPrev();
 }
 
 void MainWindow::on_horizontalSlider_sliderMoved(int position){
@@ -83,7 +87,7 @@ void MainWindow::on_horizontalSlider_sliderMoved(int position){
 }
 
 void MainWindow::on_TrackLists_itemClicked(QListWidgetItem *item){
-        int index = ui->TrackLists->row(item);
+        int index = ui->trackList->row(item);
         playerController->onItemClicked(index);
 
         ui->horizontalSlider->setMaximum(playerController->getTracks()[index].getLength());
@@ -104,18 +108,18 @@ void MainWindow::on_TrackLists_itemClicked(QListWidgetItem *item){
 }
 
 void MainWindow::addTrackToList(const QString& name) {
-    ui->TrackLists->addItem(name);
+    ui->trackList->addItem(name);
 }
 
 
-void MainWindow::DeleteTrackFromList(int index) {
-    if (index >= 0 && index < ui->TrackLists->count())
-        ui->TrackLists->takeItem(index);
+void MainWindow::deleteTrackFromList(int index) {
+    if (index >= 0 && index < ui->trackList->count())
+        ui->trackList->takeItem(index);
 }
     
 void MainWindow::setCurrentRow(int index) {
-    if (index >= 0 && index < ui->TrackLists->count()) {
-        ui->TrackLists->setCurrentRow(index);
+    if (index >= 0 && index < ui->trackList->count()) {
+        ui->trackList->setCurrentRow(index);
     }
 }
 

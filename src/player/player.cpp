@@ -10,7 +10,7 @@ Player::Player(QObject *parent) : QObject(parent)
     }
 
     mpv_set_option_string(mpv, "input-default-bindings", "yes");
-    mpv_set_option_string(mpv, "vo", "null"); // Без видео-вывода
+    mpv_set_option_string(mpv, "vo", "null"); // No video output
 
     if (mpv_initialize(mpv) < 0) {
         qFatal("Could not initialize mpv");

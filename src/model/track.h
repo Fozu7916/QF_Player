@@ -9,7 +9,7 @@ class Track
 public:
     Track();
 
-    Track(QString path1, int length1);
+    Track(QString path, int length);
 
     QString getPath() const { return path; }
     int getLength() const { return length; }

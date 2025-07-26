@@ -123,7 +123,7 @@
      <string>▶</string>
     </property>
    </widget>
-   <widget class="QListWidget" name="TrackLists">
+   <widget class="QListWidget" name="trackList">
     <property name="geometry">
      <rect>
       <x>0</x>
