@@ -101,7 +101,7 @@ void PlayerController::playOrStop(){
     }
 }
 
-void PlayerController::OnItemClicked(int index){
+void PlayerController::onItemClicked(int index){
         if (index >= 0 && index < m_tracks.size()) {
         currentTrackIndex = index;
         m_player->loadFile(m_tracks[index].getPath());

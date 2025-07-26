@@ -84,7 +84,7 @@ void MainWindow::on_horizontalSlider_sliderMoved(int position){
 
 void MainWindow::on_TrackLists_itemClicked(QListWidgetItem *item){
         int index = ui->TrackLists->row(item);
-        playerController->OnItemClicked(index);
+        playerController->onItemClicked(index);
 
         ui->horizontalSlider->setMaximum(playerController->getTracks()[index].getLength());
         if (!sliderTimer) {

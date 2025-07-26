@@ -16,7 +16,7 @@ public:
     void loadTracks();
     void addTrack(const QString& filePath, int durationSec);
     void deleteTrack();
-    void OnItemClicked(int index);
+    void onItemClicked(int index);
     void playprev();
     void playnext();
     void playOrStop();
@@ -38,7 +38,7 @@ signals:
 private:
     std::vector<Track> m_tracks;
     std::unique_ptr<Player> m_player;
-    bool isPlayed;
+    bool isPlayed = false;
     int currentTrackIndex = -1;
     void playTrackAtIndex(int index);
 };

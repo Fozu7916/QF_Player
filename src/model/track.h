@@ -13,12 +13,10 @@ public:
 
     QString getPath() const { return path; }
     int getLength() const { return length; }
-    QString getAuthor() const { return author; }
 
 private:
     QString path;
     int length; // seconds
-    QString author;
 
 };
 

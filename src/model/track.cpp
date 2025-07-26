@@ -1,8 +1,3 @@
 #include "track.h"
 
-Track::Track(QString path1, int length1) {
-    this->length = length1;
-    this->path = path1;
-}
-
-Track::Track(){};
+Track::Track(QString path1, int length1): length(length1),path(path1) {}
