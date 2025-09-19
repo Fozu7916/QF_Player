@@ -22,6 +22,8 @@ public:
     void playOrStop();
     void setVolume(int value);
     // Getters and setters for all variables
+    void setPosition(int seconds);
+    int getPosition() const;
     const std::vector<Track>& getTracks() const;
     int getTrackCount() const;
     const Track& getTrack(int index) const;

@@ -17,6 +17,7 @@ public:
     void setVolume(int volume);
     int getPosition();
     void setPosition(int seconds);
+    bool isEof();
 
 private:
     mpv_handle *mpv;

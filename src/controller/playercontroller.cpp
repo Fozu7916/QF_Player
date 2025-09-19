@@ -2,11 +2,13 @@
 #include <QFile>
 #include <QTextStream>
 #include <QFileInfo>
+#include <QDebug>
 
 PlayerController::PlayerController() : player(std::make_unique<Player>()) {}
 
 
 void PlayerController::loadTracks(QString filename) {
+    qInfo() << "Loading tracks from" << filename;
     QFile file(filename);
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&file);
@@ -23,16 +25,19 @@ void PlayerController::loadTracks(QString filename) {
             }
         }
         file.close();
+        qInfo() << "Tracks loaded:" << tracks.size();
     }
 }
 
 void PlayerController::addTrack(const QString& filePath, int durationSec) {
+    qInfo() << "Add track" << filePath << "len" << durationSec;
     Track new_track(filePath, durationSec);
     tracks.push_back(new_track);
     emit trackLoaded(QFileInfo(filePath).fileName());
 }
 
 void PlayerController::saveTracks(QString filename) {
+    qInfo() << "Saving tracks to" << filename;
     QFile file(filename);
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
@@ -44,6 +49,7 @@ void PlayerController::saveTracks(QString filename) {
 void PlayerController::deleteTrack(){
     if (tracks.empty()) return;
     if ( currentTrackIndex >= 0 and currentTrackIndex < tracks.size()){
+        qInfo() << "Delete track at index" << currentTrackIndex;
         player->pause();
         isPlayed = false;
         int deletedIndex = currentTrackIndex;
@@ -60,12 +66,23 @@ void PlayerController::setVolume(int value) {
     if (player) player->setVolume(value);
 }
 
+void PlayerController::setPosition(int seconds) {
+    if (player) player->setPosition(seconds);
+}
+
+int PlayerController::getPosition() const {
+    if (player) return player->getPosition();
+    return 0;
+}
+
 void PlayerController::playNext(){
     if (tracks.empty()) return;
     if (currentTrackIndex + 1 <= tracks.size() - 1){
+        qInfo() << "Play next from" << currentTrackIndex;
         player->pause();
         currentTrackIndex++;
     } else {
+        qInfo() << "Loop to first track";
         currentTrackIndex = 0;
     }
     playTrackAtIndex(currentTrackIndex);
@@ -74,9 +91,11 @@ void PlayerController::playNext(){
 void PlayerController::playPrev(){
     if (tracks.empty()) return;
     if (currentTrackIndex - 1 >= 0){
+        qInfo() << "Play prev from" << currentTrackIndex;
         player->pause();
         currentTrackIndex--;
     } else {
+        qInfo() << "Loop to last track";
         currentTrackIndex = tracks.size() - 1;
     }
     playTrackAtIndex(currentTrackIndex);
@@ -85,6 +104,7 @@ void PlayerController::playPrev(){
 void PlayerController::playTrackAtIndex(int index) {
     if (tracks.empty()) return;
     if ( index >= 0 and index < tracks.size()){
+        qInfo() << "Play index" << index << QFileInfo(tracks[index].getPath()).fileName();
         emit setCurrentRow(index);
         player->loadFile(tracks[index].getPath());
         player->play();
@@ -98,10 +118,12 @@ void PlayerController::playTrackAtIndex(int index) {
 void PlayerController::playOrStop(){
     if (currentTrackIndex >= 0 && currentTrackIndex < tracks.size()) {
         if (!isPlayed) {
+            qInfo() << "Play" << currentTrackIndex;
             player->play();
             isPlayed = true;
             emit playOrStopUI(true);
         } else {
+            qInfo() << "Pause" << currentTrackIndex;
             player->pause();
             isPlayed = false;
             emit playOrStopUI(false);
@@ -115,6 +137,7 @@ void PlayerController::playOrStop(){
 
 void PlayerController::onItemClicked(int index){
         if (index >= 0 && index < tracks.size()) {
+            qInfo() << "Click index" << index;
             currentTrackIndex = index;
             player->loadFile(tracks[index].getPath());
             player->play();

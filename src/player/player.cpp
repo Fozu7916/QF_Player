@@ -26,34 +26,63 @@ Player::~Player()
 
 void Player::loadFile(const QString &filePath)
 {
-    const char *cmd[] = {"loadfile", filePath.toUtf8().constData(), nullptr};
-    mpv_command(mpv, cmd);
+    const QByteArray pathUtf8 = filePath.toUtf8();
+    const char *cmd[] = {"loadfile", pathUtf8.constData(), nullptr};
+    int status = mpv_command(mpv, cmd);
+    if (status < 0) {
+        qWarning() << "mpv loadfile failed with status" << status << "for" << filePath;
+    }
 }
 
 void Player::play()
 {
-    mpv_set_property_string(mpv, "pause", "no");
+    int status = mpv_set_property_string(mpv, "pause", "no");
+    if (status < 0) {
+        qWarning() << "mpv play failed" << status;
+    }
 }
 
 void Player::pause()
 {
-    mpv_set_property_string(mpv, "pause", "yes");
+    int status = mpv_set_property_string(mpv, "pause", "yes");
+    if (status < 0) {
+        qWarning() << "mpv pause failed" << status;
+    }
 }
 
 void Player::setVolume(int volume)
 {
-    mpv_set_property_string(mpv, "volume", QString::number(volume).toUtf8().constData());
+    const QByteArray vol = QString::number(volume).toUtf8();
+    int status = mpv_set_property_string(mpv, "volume", vol.constData());
+    if (status < 0) {
+        qWarning() << "mpv set volume failed" << status << "value" << volume;
+    }
 }
 
 int Player::getPosition() {
     if (!mpv) return 0;
     double pos = 0;
-    mpv_get_property(mpv, "time-pos", MPV_FORMAT_DOUBLE, &pos);
+    int status = mpv_get_property(mpv, "time-pos", MPV_FORMAT_DOUBLE, &pos);
+    if (status < 0) {
+        // Возвращаем 0 при ошибке чтения позиции
+        return 0;
+    }
     return static_cast<int>(pos);
 }
 
 void Player::setPosition(int seconds) {
     if (!mpv) return;
     double pos = static_cast<double>(seconds);
-    mpv_set_property(mpv, "time-pos", MPV_FORMAT_DOUBLE, &pos);
+    int status = mpv_set_property(mpv, "time-pos", MPV_FORMAT_DOUBLE, &pos);
+    if (status < 0) {
+        qWarning() << "mpv set position failed" << status << "seconds" << seconds;
+    }
+}
+
+bool Player::isEof() {
+    if (!mpv) return false;
+    int flag = 0;
+    int status = mpv_get_property(mpv, "eof-reached", MPV_FORMAT_FLAG, &flag);
+    if (status < 0) return false;
+    return flag != 0;
 }
