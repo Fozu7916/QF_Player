@@ -24,7 +24,7 @@ TextRedactor — это простой, но функциональный муз
    git clone https://github.com/yourname/TextRedactor.git
    cd TextRedactor
    ```
-3. Убедитесь, что в папке `mpv/` лежат файлы `libmpv-2.dll` и `libmpv.dll.a`
+3. Установите зависимости mpv (см. ниже)
 4. Соберите проект:
    ```bash
    mkdir build
@@ -37,6 +37,20 @@ TextRedactor — это простой, но функциональный муз
 ## Зависимости
 - [Qt 6.x](https://www.qt.io/download)
 - [mpv](https://mpv.io/)
+
+### Как установить mpv для проекта (без коммита больших файлов)
+
+Windows (PowerShell, автозагрузка libmpv из mpv-winbuild):
+```powershell
+./scripts/fetch_mpv_win.ps1 -Url "https://github.com/zhongfly/mpv-winbuild/releases/download/2025-09-19-0bbcc91/mpv-x86_64-20250919-git-0bbcc91.7z"
+```
+Скрипт скачает архив и положит `mpv/libmpv-2.dll` и `mpv/libmpv.dll.a`.
+
+Linux (Debian/Ubuntu):
+```bash
+chmod +x scripts/fetch_mpv_linux.sh
+./scripts/fetch_mpv_linux.sh
+```
 
 ## Структура проекта
 ```
