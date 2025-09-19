@@ -14,6 +14,14 @@
 #include <QtConcurrent>
 #include <QFuture>
 #include "../controller/playercontroller.h"
+#ifdef HAVE_MPRIS
+#include "../integration/mpris_service.h"
+#endif
+#ifdef _WIN32
+#include <QAbstractNativeEventFilter>
+#include <windows.h>
+#endif
+#include "mediaosd.h"
 
 const int DEFAULT_VOLUME = 50;
 const QString PLAYLIST_FILENAME = "tracks.txt";
@@ -56,6 +64,48 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->volumeSlider->setValue(savedVolume);
     ui->volume->setText(QString::number(savedVolume));
+
+#ifdef HAVE_MPRIS
+    mprisService = new MprisService(playerController.get(), this);
+#endif
+
+#ifdef _WIN32
+    osd = new MediaOsd(nullptr);
+    class WinMediaKeysFilter : public QAbstractNativeEventFilter {
+    public:
+        explicit WinMediaKeysFilter(MainWindow* w) : window(w) {}
+        bool nativeEventFilter(const QByteArray &eventType, void *message, qintptr *result) override {
+            if (eventType == "windows_generic_MSG") {
+                MSG* msg = static_cast<MSG*>(message);
+                if (msg && msg->message == WM_APPCOMMAND) {
+                    int cmd = GET_APPCOMMAND_LPARAM(msg->lParam);
+                    switch (cmd) {
+                        case APPCOMMAND_MEDIA_PLAY_PAUSE:
+                            window->on_playOrStopButton_clicked();
+                            if (window->osd) window->osd->showMessage("⏯", "Play/Pause");
+                            break;
+                        case APPCOMMAND_MEDIA_NEXTTRACK:
+                            window->on_nextButton_clicked();
+                            if (window->osd) window->osd->showMessage("▶▶", "Next");
+                            break;
+                        case APPCOMMAND_MEDIA_PREVIOUSTRACK:
+                            window->on_prevButton_clicked();
+                            if (window->osd) window->osd->showMessage("◀◀", "Previous");
+                            break;
+                        default:
+                            return false;
+                    }
+                    if (result) *result = 1;
+                    return true;
+                }
+            }
+            return false;
+        }
+    private:
+        MainWindow* window;
+    };
+    qApp->installNativeEventFilter(new WinMediaKeysFilter(this));
+#endif
 }
 
 MainWindow::~MainWindow(){
@@ -75,7 +125,6 @@ void MainWindow::on_addButton_clicked(){
     QStringList filePaths = QFileDialog::getOpenFileNames(this, "Выберите треки", "", "Аудио файлы (*.mp3 *.wav *.flac)");
     for (const QString &filePath : filePaths) {
         if (filePath.isEmpty()) continue;
-        // Считаем длительность в фоне и добавляем трек в главном потоке
         QtConcurrent::run([this, filePath]() {
             int dur = getDuration(filePath);
             QMetaObject::invokeMethod(this, [this, filePath, dur]() {

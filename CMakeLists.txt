@@ -13,6 +13,9 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Multimedia Concurrent)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Multimedia Concurrent)
+if(UNIX AND NOT APPLE)
+  find_package(Qt${QT_VERSION_MAJOR} COMPONENTS DBus)
+endif()
 
 # Указываем пути к mpv
 set(MPV_DIR "${CMAKE_SOURCE_DIR}/mpv")
@@ -41,8 +44,12 @@ set(PROJECT_SOURCES
     src/view/mainwindow.cpp
     src/view/mainwindow.h
     src/view/mainwindow.ui
+    src/view/mediaosd.h
+    src/view/mediaosd.cpp
     src/controller/playercontroller.h
     src/controller/playercontroller.cpp
+    src/integration/mpris_service.h
+    src/integration/mpris_service.cpp
     resources/resources.qrc
 )
 
@@ -72,6 +79,10 @@ target_link_libraries(TextRedactor PRIVATE
     Qt${QT_VERSION_MAJOR}::Concurrent
     mpv
 )
+if(UNIX AND NOT APPLE AND TARGET Qt${QT_VERSION_MAJOR}::DBus)
+  target_link_libraries(TextRedactor PRIVATE Qt${QT_VERSION_MAJOR}::DBus)
+  target_compile_definitions(TextRedactor PRIVATE HAVE_MPRIS=1)
+endif()
 
 # Копирование DLL в папку сборки (Windows)
 if(WIN32)

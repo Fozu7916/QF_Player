@@ -22,7 +22,7 @@ TextRedactor — это простой, но функциональный муз
 2. Клонируйте репозиторий:
    ```bash
    git clone https://github.com/yourname/TextRedactor.git
-   cd TextRedactor
+   cd QF_player
    ```
 3. Установите зависимости mpv (см. ниже)
 4. Соберите проект:

@@ -8,6 +8,11 @@
 #include <QListWidgetItem>
 #include <QTimer>
 
+#ifdef HAVE_MPRIS
+class MprisService;
+#endif
+class MediaOsd;
+
 namespace Ui {
 class MainWindow;
 }
@@ -41,6 +46,11 @@ private:
     QTimer *sliderTimer;
     std::unique_ptr<PlayerController> playerController;
     void updateSliderAndTimerForIndex(int index);
+#ifdef HAVE_MPRIS
+    MprisService* mprisService = nullptr;
+#endif
+    MediaOsd* osd = nullptr;
+    //ifdef>
 
 };
 
