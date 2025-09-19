@@ -5,6 +5,7 @@ class TestPlayer : public QObject {
     Q_OBJECT
 private slots:
     void createAndCallMethods();
+    void eofWithoutFile_isFalse();
 };
 
 void TestPlayer::createAndCallMethods() {
@@ -13,6 +14,12 @@ void TestPlayer::createAndCallMethods() {
     p.setPosition(10);
     // Проверяем, что методы не падают
     QVERIFY(true);
+}
+
+void TestPlayer::eofWithoutFile_isFalse() {
+    Player p;
+    QVERIFY(p.isEof() == false);
+    QVERIFY(p.getPosition() == 0);
 }
 
 QTEST_MAIN(TestPlayer)

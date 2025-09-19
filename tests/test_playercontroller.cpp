@@ -37,6 +37,7 @@ private slots:
     void playOrStop_emptyList_noCrash();
     void saveTracks_createsFile();
     void loadTracks_loadsCorrectly();
+    void position_get_set_routed_via_controller();
 };
 
 void TestPlayerController::addTrack_increasesCount() {
@@ -154,6 +155,13 @@ void TestPlayerController::loadTracks_loadsCorrectly() {
     QCOMPARE(pc2.getTrackCount(), 2);
     QCOMPARE(pc2.getTrack(0).getPath(), QString("/music/track1.mp3"));
     QCOMPARE(pc2.getTrack(1).getLength(), 200);
+}
+
+void TestPlayerController::position_get_set_routed_via_controller() {
+    PlayerController pc;
+    pc.addTrack("/music/track1.mp3", 100);
+    pc.setPosition(5);
+    QVERIFY(pc.getPosition() >= 0);
 }
 
 QTEST_MAIN(TestPlayerController)

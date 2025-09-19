@@ -11,6 +11,8 @@
 #include <QTextStream>
 #include <QUrl>
 #include <QSettings>
+#include <QtConcurrent>
+#include <QFuture>
 #include "../controller/playercontroller.h"
 
 const int DEFAULT_VOLUME = 50;
@@ -37,13 +39,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(playerController.get(), &PlayerController::setCurrentRow, this, &MainWindow::setCurrentRow);
     connect(playerController.get(), &PlayerController::playOrStopUI, this, &MainWindow::onPlayOrStopUI);
 
-    ui->volumeSlider->setRange(0, 100);
-
     QSettings settings("QF_Player", "QF_Player");
     int savedVolume = settings.value("audio/volume", DEFAULT_VOLUME).toInt();
-    ui->volumeSlider->setValue(savedVolume);
-    ui->volume->setText(QString::number(savedVolume));
 
+    
+    ui->volumeSlider->setRange(0, 100);
     playerController->loadTracks(PLAYLIST_FILENAME);
     int lastIndex = settings.value("player/lastIndex", -1).toInt();
     if (lastIndex >= 0 && lastIndex < static_cast<int>(playerController->getTracks().size())) {
@@ -53,6 +53,9 @@ MainWindow::MainWindow(QWidget *parent)
         ui->horizontalSlider->setValue(0);
         ui->time->setText("0:00");
     }
+
+    ui->volumeSlider->setValue(savedVolume);
+    ui->volume->setText(QString::number(savedVolume));
 }
 
 MainWindow::~MainWindow(){
@@ -71,9 +74,14 @@ void MainWindow::on_playOrStopButton_clicked(){
 void MainWindow::on_addButton_clicked(){
     QStringList filePaths = QFileDialog::getOpenFileNames(this, "Выберите треки", "", "Аудио файлы (*.mp3 *.wav *.flac)");
     for (const QString &filePath : filePaths) {
-        if (!filePath.isEmpty()) {
-            playerController->addTrack(filePath, getDuration(filePath));
-        }
+        if (filePath.isEmpty()) continue;
+        // Считаем длительность в фоне и добавляем трек в главном потоке
+        QtConcurrent::run([this, filePath]() {
+            int dur = getDuration(filePath);
+            QMetaObject::invokeMethod(this, [this, filePath, dur]() {
+                playerController->addTrack(filePath, dur);
+            }, Qt::QueuedConnection);
+        });
     }
 }
 
@@ -152,7 +160,6 @@ void MainWindow::updateSliderAndTimerForIndex(int index) {
         connect(sliderTimer, &QTimer::timeout, this, [this]() {
             if (playerController->getCurrentIndex() >= 0 && playerController->getCurrentIndex() < playerController->getTracks().size()) {
                 int pos = playerController->getPlayer()->getPosition();
-                // Надёжный переход: EOF от mpv или позиция близка к максимуму
                 if (playerController->getPlayer()->isEof() || (ui->horizontalSlider->maximum() > 0 && pos >= ui->horizontalSlider->maximum() - 1)) {
                     playerController->playNext();
                     updateSliderAndTimerForIndex(playerController->getCurrentIndex());
