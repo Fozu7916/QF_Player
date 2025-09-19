@@ -50,7 +50,6 @@ MainWindow::MainWindow(QWidget *parent)
     QSettings settings("QF_Player", "QF_Player");
     int savedVolume = settings.value("audio/volume", DEFAULT_VOLUME).toInt();
 
-    
     ui->volumeSlider->setRange(0, 100);
     playerController->loadTracks(PLAYLIST_FILENAME);
     int lastIndex = settings.value("player/lastIndex", -1).toInt();
@@ -161,41 +160,10 @@ void MainWindow::on_prevButton_clicked(){
     updateSliderAndTimerForIndex(playerController->getCurrentIndex());
 }
 
-void MainWindow::on_horizontalSlider_sliderMoved(int position){
-    playerController->getPlayer()->setPosition(position);
-    int min = position / 60;
-    int sec = position % 60;
-    ui->time->setText(QString::asprintf("%d:%02d", min, sec));
-}
-
 void MainWindow::on_TrackLists_itemClicked(QListWidgetItem *item){
         int index = ui->trackList->row(item);
         playerController->onItemClicked(index);
         updateSliderAndTimerForIndex(index);
-}
-
-void MainWindow::addTrackToList(const QString& name) {
-    ui->trackList->addItem(name);
-}
-
-
-void MainWindow::deleteTrackFromList(int index) {
-    if (index >= 0 && index < ui->trackList->count())
-        ui->trackList->takeItem(index);
-}
-    
-void MainWindow::setCurrentRow(int index) {
-    if (index >= 0 && index < ui->trackList->count()) {
-        ui->trackList->setCurrentRow(index);
-    }
-}
-
-void MainWindow::onPlayOrStopUI(bool isPlaying) {
-    if (isPlaying) {
-        ui->playOrStopButton->setText("⏸");
-    } else {
-        ui->playOrStopButton->setText("▶");
-    }
 }
 
 void MainWindow::updateSliderAndTimerForIndex(int index) {
@@ -223,3 +191,36 @@ void MainWindow::updateSliderAndTimerForIndex(int index) {
     }
     if (!sliderTimer->isActive()) sliderTimer->start(500);
 }
+
+void MainWindow::on_horizontalSlider_sliderMoved(int position){
+    playerController->getPlayer()->setPosition(position);
+    int min = position / 60;
+    int sec = position % 60;
+    ui->time->setText(QString::asprintf("%d:%02d", min, sec));
+}
+
+void MainWindow::addTrackToList(const QString& name) {
+    ui->trackList->addItem(name);
+}
+
+
+void MainWindow::deleteTrackFromList(int index) {
+    if (index >= 0 && index < ui->trackList->count())
+        ui->trackList->takeItem(index);
+}
+    
+void MainWindow::setCurrentRow(int index) {
+    if (index >= 0 && index < ui->trackList->count()) {
+        ui->trackList->setCurrentRow(index);
+    }
+}
+
+void MainWindow::onPlayOrStopUI(bool isPlaying) {
+    if (isPlaying) {
+        ui->playOrStopButton->setText("⏸");
+    } else {
+        ui->playOrStopButton->setText("▶");
+    }
+}
+
+
