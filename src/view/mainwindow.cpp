@@ -21,7 +21,7 @@
 #include <QAbstractNativeEventFilter>
 #include <windows.h>
 #endif
-#include "mediaosd.h"
+#include "../integration/mediaosd.h"
 
 const int DEFAULT_VOLUME = 50;
 const QString PLAYLIST_FILENAME = "tracks.txt";

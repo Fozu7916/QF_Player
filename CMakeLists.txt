@@ -44,8 +44,8 @@ set(PROJECT_SOURCES
     src/view/mainwindow.cpp
     src/view/mainwindow.h
     src/view/mainwindow.ui
-    src/view/mediaosd.h
-    src/view/mediaosd.cpp
+    src/integration/mediaosd.h
+    src/integration/mediaosd.cpp
     src/controller/playercontroller.h
     src/controller/playercontroller.cpp
     src/integration/mpris_service.h
@@ -54,7 +54,7 @@ set(PROJECT_SOURCES
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(TextRedactor
+    qt_add_executable(QF_Player
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         src/player/player.h src/player/player.cpp
@@ -62,43 +62,43 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     )
 else()
     if(ANDROID)
-        add_library(TextRedactor SHARED
+        add_library(QF_Player SHARED
             ${PROJECT_SOURCES}
         )
     else()
-        add_executable(TextRedactor
+        add_executable(QF_Player
             ${PROJECT_SOURCES}
         )
     endif()
 endif()
 
 # Линкуем как Qt, так и mpv
-target_link_libraries(TextRedactor PRIVATE
+target_link_libraries(QF_Player PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Multimedia
     Qt${QT_VERSION_MAJOR}::Concurrent
     mpv
 )
 if(UNIX AND NOT APPLE AND TARGET Qt${QT_VERSION_MAJOR}::DBus)
-  target_link_libraries(TextRedactor PRIVATE Qt${QT_VERSION_MAJOR}::DBus)
-  target_compile_definitions(TextRedactor PRIVATE HAVE_MPRIS=1)
+  target_link_libraries(QF_Player PRIVATE Qt${QT_VERSION_MAJOR}::DBus)
+  target_compile_definitions(QF_Player PRIVATE HAVE_MPRIS=1)
 endif()
 
 # Копирование DLL в папку сборки (Windows)
 if(WIN32)
-    add_custom_command(TARGET TextRedactor POST_BUILD
+    add_custom_command(TARGET QF_Player POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
             "${MPV_DIR}/libmpv-2.dll"
-            "$<TARGET_FILE_DIR:TextRedactor>"
+            "$<TARGET_FILE_DIR:QF_Player>"
         COMMENT "Copying libmpv-2.dll to output directory"
     )
 endif()
 
 if(${QT_VERSION} VERSION_LESS 6.1.0)
-    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.TextRedactor)
+    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.QF_Player)
 endif()
 
-set_target_properties(TextRedactor PROPERTIES
+set_target_properties(QF_Player PROPERTIES
     ${BUNDLE_ID_OPTION}
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -107,14 +107,14 @@ set_target_properties(TextRedactor PROPERTIES
 )
 
 include(GNUInstallDirs)
-install(TARGETS TextRedactor
+install(TARGETS QF_Player
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(TextRedactor)
+    qt_finalize_executable(QF_Player)
 endif()
 
 add_subdirectory(tests)
