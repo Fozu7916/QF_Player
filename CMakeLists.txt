@@ -52,7 +52,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         src/player/player.h src/player/player.cpp
         src/model/track.h src/model/track.cpp
-        src/changebackground.h src/changebackground.cpp
     )
 else()
     if(ANDROID)

@@ -9,7 +9,6 @@
 #include <QString>
 #include <QFile>
 #include <QTextStream>
-#include "../changebackground.h"
 #include "../controller/playercontroller.h"
 
 const int DEFAULT_VOLUME = 50;
@@ -22,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
     , playerController(std::make_unique<PlayerController>())
 {
     ui->setupUi(this);
-    changebackground(this,":/images/fone.jpg");
+    if (statusBar()) statusBar()->hide();
 
     ui->volumeSlider->setRange(0, 100);
     ui->volumeSlider->setValue(DEFAULT_VOLUME);
