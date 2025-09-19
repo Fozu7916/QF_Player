@@ -9,6 +9,7 @@
 #include <QString>
 #include <QFile>
 #include <QTextStream>
+#include <QUrl>
 #include "../controller/playercontroller.h"
 
 const int DEFAULT_VOLUME = 50;
@@ -23,9 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     if (statusBar()) statusBar()->hide();
 
-    ui->volumeSlider->setRange(0, 100);
-    ui->volumeSlider->setValue(DEFAULT_VOLUME);
-    ui->volume->setText(QString::number(DEFAULT_VOLUME));
+    connect(ui->trackList, &QListWidget::itemClicked,
+            this, &MainWindow::on_TrackLists_itemClicked);
 
     connect(ui->volumeSlider, &QSlider::valueChanged, this, [this](int value){
         ui->volume->setText(QString::number(value));
@@ -35,6 +35,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(playerController.get(), &PlayerController::trackLoaded, this, &MainWindow::addTrackToList);
     connect(playerController.get(), &PlayerController::setCurrentRow, this, &MainWindow::setCurrentRow);
     connect(playerController.get(), &PlayerController::playOrStopUI, this, &MainWindow::onPlayOrStopUI);
+
+    ui->volumeSlider->setRange(0, 100);
+    ui->volumeSlider->setValue(DEFAULT_VOLUME);
+    ui->volume->setText(QString::number(DEFAULT_VOLUME));
 
     playerController->loadTracks(PLAYLIST_FILENAME);
 }
@@ -49,8 +53,12 @@ void MainWindow::on_playOrStopButton_clicked(){
 }
 
 void MainWindow::on_addButton_clicked(){
-    QString filePath = QFileDialog::getOpenFileName(this, "Выберите трек", "", "Аудио файлы (*.mp3 *.wav *.flac)");
-    if (!filePath.isEmpty()) playerController->addTrack(filePath,getDuration(filePath));
+    QStringList filePaths = QFileDialog::getOpenFileNames(this, "Выберите треки", "", "Аудио файлы (*.mp3 *.wav *.flac)");
+    for (const QString &filePath : filePaths) {
+        if (!filePath.isEmpty()) {
+            playerController->addTrack(filePath, getDuration(filePath));
+        }
+    }
 }
 
 int MainWindow::getDuration(QString filePath){
@@ -72,10 +80,12 @@ void MainWindow::on_deleteButton_clicked(){
 
 void MainWindow::on_nextButton_clicked(){
     playerController->playNext();
+    updateSliderAndTimerForIndex(playerController->getCurrentIndex());
 }
 
 void MainWindow::on_prevButton_clicked(){
     playerController->playPrev();
+    updateSliderAndTimerForIndex(playerController->getCurrentIndex());
 }
 
 void MainWindow::on_horizontalSlider_sliderMoved(int position){
@@ -88,22 +98,7 @@ void MainWindow::on_horizontalSlider_sliderMoved(int position){
 void MainWindow::on_TrackLists_itemClicked(QListWidgetItem *item){
         int index = ui->trackList->row(item);
         playerController->onItemClicked(index);
-
-        ui->horizontalSlider->setMaximum(playerController->getTracks()[index].getLength());
-        if (!sliderTimer) {
-            sliderTimer = new QTimer(this);
-            connect(sliderTimer, &QTimer::timeout, this, [this]() {
-                if (playerController->getCurrentIndex() >= 0 && playerController->getCurrentIndex() < playerController->getTracks().size()) {
-                    int pos = playerController->getPlayer()->getPosition();
-                    ui->horizontalSlider->setValue(pos);
-                    int min = pos / 60;
-                    int sec = pos % 60;
-                    ui->time->setText(QString::asprintf("%d:%02d", min, sec));
-                }
-            });
-        }
-
-        sliderTimer->start(500);
+        updateSliderAndTimerForIndex(index);
 }
 
 void MainWindow::addTrackToList(const QString& name) {
@@ -128,4 +123,30 @@ void MainWindow::onPlayOrStopUI(bool isPlaying) {
     } else {
         ui->playOrStopButton->setText("▶");
     }
+}
+
+void MainWindow::updateSliderAndTimerForIndex(int index) {
+    if (index < 0 || index >= static_cast<int>(playerController->getTracks().size())) return;
+    onPlayOrStopUI(true);
+    ui->horizontalSlider->setMaximum(playerController->getTracks()[index].getLength());
+    ui->horizontalSlider->setValue(0);
+    ui->time->setText("0:00");
+    if (!sliderTimer) {
+        sliderTimer = new QTimer(this);
+        connect(sliderTimer, &QTimer::timeout, this, [this]() {
+            if (playerController->getCurrentIndex() >= 0 && playerController->getCurrentIndex() < playerController->getTracks().size()) {
+                int pos = playerController->getPlayer()->getPosition();
+                if (ui->horizontalSlider->maximum() > 0 && pos >= ui->horizontalSlider->maximum()) {
+                    playerController->playNext();
+                    updateSliderAndTimerForIndex(playerController->getCurrentIndex());
+                    return;
+                }
+                ui->horizontalSlider->setValue(pos);
+                int min = pos / 60;
+                int sec = pos % 60;
+                ui->time->setText(QString::asprintf("%d:%02d", min, sec));
+            }
+        });
+    }
+    if (!sliderTimer->isActive()) sliderTimer->start(500);
 }

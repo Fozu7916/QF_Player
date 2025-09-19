@@ -40,6 +40,7 @@ private:
     std::vector<Track> trackList;
     QTimer *sliderTimer;
     std::unique_ptr<PlayerController> playerController;
+    void updateSliderAndTimerForIndex(int index);
 
 };
 
