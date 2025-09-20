@@ -16,7 +16,8 @@ QF_Player — это простой, но функциональный музы�
 ![Скриншот](
 <img width="555" height="701" alt="image" src="https://github.com/user-attachments/assets/87632910-98d3-426b-ae1f-ddbc57255450" />)
 
-)
+
+<img width="555" height="701" alt="image" src="https://github.com/user-attachments/assets/87632910-98d3-426b-ae1f-ddbc57255450" />
 
 ## Как собрать
 
