@@ -8,6 +8,9 @@
 #include <QListWidgetItem>
 #include <QTimer>
 #include <QMovie>
+#ifdef _WIN32
+#include "../integration/mediaosd.h"
+#endif
 
 namespace Ui {
 class MainWindow;
@@ -27,6 +30,15 @@ public slots:
     void setCurrentRow(int index);
     void onPlayOrStopUI(bool isPlaying);
     
+#ifdef _WIN32
+protected:
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    bool nativeEvent(const QByteArray &eventType, void *message, qintptr *result) override;
+#else
+    bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
+#endif
+#endif
+    
 private slots:
     int getDuration(QString filePath);
     void on_playOrStopButton_clicked();
@@ -45,6 +57,12 @@ private:
     std::unique_ptr<PlayerController> playerController;
     void updateSliderAndTimerForIndex(int index);
     QMovie* gifMovie;
+#ifdef _WIN32
+    MediaOsd* m_osd;
+    void registerGlobalMediaHotkeys();
+    void unregisterGlobalMediaHotkeys();
+    enum { HOTKEY_ID_PLAYPAUSE = 0xA100, HOTKEY_ID_NEXT = 0xA101, HOTKEY_ID_PREV = 0xA102, HOTKEY_ID_STOP = 0xA103 };
+#endif
 };
 
 #endif // MAINWINDOW_H

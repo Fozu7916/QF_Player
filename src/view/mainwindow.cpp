@@ -62,6 +62,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui->volumeSlider->setValue(savedVolume);
     ui->volume->setText(QString::number(savedVolume));
 
+#ifdef _WIN32
+    m_osd = new MediaOsd(this);
+    registerGlobalMediaHotkeys();
+#else
+    m_osd = nullptr;
+#endif
 }
 
 MainWindow::~MainWindow(){
@@ -184,4 +190,108 @@ void MainWindow::on_pushButton_clicked(bool checked)
 {
     playerController->setRandom(checked);
 }
+
+#ifdef _WIN32
+#include <windows.h>
+
+#ifndef APPCOMMAND_MEDIA_NEXTTRACK
+#define APPCOMMAND_MEDIA_NEXTTRACK 11
+#endif
+#ifndef APPCOMMAND_MEDIA_PREVIOUSTRACK
+#define APPCOMMAND_MEDIA_PREVIOUSTRACK 12
+#endif
+#ifndef APPCOMMAND_MEDIA_STOP
+#define APPCOMMAND_MEDIA_STOP 13
+#endif
+#ifndef APPCOMMAND_MEDIA_PLAY_PAUSE
+#define APPCOMMAND_MEDIA_PLAY_PAUSE 14
+#endif
+
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, qintptr *result)
+#else
+bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
+#endif
+{
+    Q_UNUSED(eventType);
+    MSG* msg = static_cast<MSG*>(message);
+    if (!msg) return false;
+
+    if (msg->message == WM_HOTKEY) {
+        switch (static_cast<int>(msg->wParam)) {
+            case HOTKEY_ID_PLAYPAUSE:
+                playerController->playOrStop();
+                if (m_osd) m_osd->showMessage("⏯", "Play/Pause", 1000);
+                break;
+            case HOTKEY_ID_NEXT:
+                playerController->playNext();
+                updateSliderAndTimerForIndex(playerController->getCurrentIndex());
+                if (m_osd) m_osd->showMessage("⏭", "Next", 1000);
+                break;
+            case HOTKEY_ID_PREV:
+                playerController->playPrev();
+                updateSliderAndTimerForIndex(playerController->getCurrentIndex());
+                if (m_osd) m_osd->showMessage("⏮", "Previous", 1000);
+                break;
+            case HOTKEY_ID_STOP:
+                if (playerController->getPlayed()) {
+                    playerController->playOrStop();
+                    if (m_osd) m_osd->showMessage("⏹", "Stop", 1000);
+                }
+                break;
+        }
+        if (result) *result = 1;
+        return true;
+    }
+
+    if (msg->message == WM_APPCOMMAND) {
+        const int cmd = GET_APPCOMMAND_LPARAM(msg->lParam);
+        switch (cmd) {
+            case APPCOMMAND_MEDIA_PLAY_PAUSE:
+                playerController->playOrStop();
+                if (m_osd) m_osd->showMessage("⏯", "Play/Pause", 1000);
+                break;
+            case APPCOMMAND_MEDIA_NEXTTRACK:
+                playerController->playNext();
+                updateSliderAndTimerForIndex(playerController->getCurrentIndex());
+                if (m_osd) m_osd->showMessage("⏭", "Next", 1000);
+                break;
+            case APPCOMMAND_MEDIA_PREVIOUSTRACK:
+                playerController->playPrev();
+                updateSliderAndTimerForIndex(playerController->getCurrentIndex());
+                if (m_osd) m_osd->showMessage("⏮", "Previous", 1000);
+                break;
+            case APPCOMMAND_MEDIA_STOP:
+                if (playerController->getPlayed()) {
+                    playerController->playOrStop();
+                    if (m_osd) m_osd->showMessage("⏹", "Stop", 1000);
+                }
+                break;
+            default:
+                break;
+        }
+        if (result) *result = 1;
+        return true;
+    }
+    return false;
+}
+#endif
+
+#ifdef _WIN32
+void MainWindow::registerGlobalMediaHotkeys() {
+    HWND hwnd = reinterpret_cast<HWND>(winId());
+    RegisterHotKey(hwnd, HOTKEY_ID_PLAYPAUSE, 0, VK_MEDIA_PLAY_PAUSE);
+    RegisterHotKey(hwnd, HOTKEY_ID_NEXT, 0, VK_MEDIA_NEXT_TRACK);
+    RegisterHotKey(hwnd, HOTKEY_ID_PREV, 0, VK_MEDIA_PREV_TRACK);
+    RegisterHotKey(hwnd, HOTKEY_ID_STOP, 0, VK_MEDIA_STOP);
+}
+
+void MainWindow::unregisterGlobalMediaHotkeys() {
+    HWND hwnd = reinterpret_cast<HWND>(winId());
+    UnregisterHotKey(hwnd, HOTKEY_ID_PLAYPAUSE);
+    UnregisterHotKey(hwnd, HOTKEY_ID_NEXT);
+    UnregisterHotKey(hwnd, HOTKEY_ID_PREV);
+    UnregisterHotKey(hwnd, HOTKEY_ID_STOP);
+}
+#endif
 
