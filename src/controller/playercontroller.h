@@ -32,6 +32,10 @@ public:
     void setCurrentIndex(int index);
     int getCurrentIndex() const;
     Player* getPlayer() const;
+    void setRandom(bool now);
+    bool getRandom() const;
+    void setPlayed(bool now);
+    bool getPlayed() const;
 signals:
     void trackLoaded(const QString& name);
     void trackDeleted(int index);
@@ -41,6 +45,7 @@ private:
     std::vector<Track> tracks;
     std::unique_ptr<Player> player;
     bool isPlayed = false;
+    bool isRandom = false;
     int currentTrackIndex = -1;
     void playTrackAtIndex(int index);
 };

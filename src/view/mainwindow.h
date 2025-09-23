@@ -7,6 +7,7 @@
 #include "../controller/playercontroller.h"
 #include <QListWidgetItem>
 #include <QTimer>
+#include <QMovie>
 
 #ifdef HAVE_MPRIS
 class MprisService;
@@ -40,18 +41,19 @@ private slots:
     void on_nextButton_clicked();
     void on_prevButton_clicked();
     void on_horizontalSlider_sliderMoved(int position);
+    void on_pushButton_clicked(bool checked);
+
 private:
     Ui::MainWindow *ui;
     std::vector<Track> trackList;
     QTimer *sliderTimer;
     std::unique_ptr<PlayerController> playerController;
     void updateSliderAndTimerForIndex(int index);
+    QMovie* gifMovie;
 #ifdef HAVE_MPRIS
     MprisService* mprisService = nullptr;
 #endif
     MediaOsd* osd = nullptr;
-    //ifdef>
-
 };
 
 #endif // MAINWINDOW_H

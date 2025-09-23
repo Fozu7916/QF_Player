@@ -3,6 +3,8 @@
 #include <QTextStream>
 #include <QFileInfo>
 #include <QDebug>
+#include <random>
+#include <ctime>
 
 PlayerController::PlayerController() : player(std::make_unique<Player>()) {}
 
@@ -77,13 +79,21 @@ int PlayerController::getPosition() const {
 
 void PlayerController::playNext(){
     if (tracks.empty()) return;
-    if (currentTrackIndex + 1 <= tracks.size() - 1){
-        qInfo() << "Play next from" << currentTrackIndex;
-        player->pause();
-        currentTrackIndex++;
-    } else {
-        qInfo() << "Loop to first track";
-        currentTrackIndex = 0;
+    if(isRandom){
+        static std::random_device rd;
+        static std::mt19937 engine(rd());
+        std::uniform_int_distribution<size_t> dist(0, tracks.size() - 1);
+        size_t index = dist(engine);
+        currentTrackIndex = static_cast<int>(index);
+    } else{
+        if (currentTrackIndex + 1 <= tracks.size() - 1){
+            qInfo() << "Play next from" << currentTrackIndex;
+            player->pause();
+            currentTrackIndex++;
+        } else {
+            qInfo() << "Loop to first track";
+            currentTrackIndex = 0;
+        }
     }
     playTrackAtIndex(currentTrackIndex);
 }
@@ -182,4 +192,16 @@ Player* PlayerController::getPlayer() const {
     return player.get();
 }
 
+void PlayerController::setRandom(bool now) {
+    isRandom = now;
+}
+bool PlayerController::getRandom() const{
+    return isRandom;
+}
 
+void PlayerController::setPlayed(bool now){
+    isPlayed = now;
+}
+bool PlayerController::getPlayed() const{
+    return isPlayed;
+}

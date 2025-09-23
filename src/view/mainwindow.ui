@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>505</width>
-    <height>625</height>
+    <width>656</width>
+    <height>781</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -80,18 +80,35 @@
        <layout class="QVBoxLayout" name="verticalLayout_5"/>
       </item>
       <item>
-       <widget class="QTextEdit" name="textEdit">
-        <property name="enabled">
-         <bool>true</bool>
+       <widget class="QLabel" name="nekoArcLabel">
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
         </property>
-        <property name="styleSheet">
-         <string notr="true">background: transparent; border: none;</string>
+        <property name="maximumSize">
+         <size>
+          <width>800</width>
+          <height>800</height>
+         </size>
         </property>
-        <property name="frameShape">
-         <enum>QFrame::Shape::NoFrame</enum>
+        <property name="text">
+         <string/>
         </property>
-        <property name="lineWidth">
-         <number>0</number>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="time">
+        <property name="text">
+         <string>0:00</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="horizontalSlider">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
        </widget>
       </item>
@@ -100,19 +117,52 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
-           <widget class="QPushButton" name="prevButton">
+           <widget class="QPushButton" name="pushButton">
+            <property name="minimumSize">
+             <size>
+              <width>60</width>
+              <height>40</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <pointsize>24</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>◀</string>
+             <string>🔀</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="prevButton">
+            <property name="minimumSize">
+             <size>
+              <width>60</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>24</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>⏮</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="playOrStopButton">
+            <property name="minimumSize">
+             <size>
+              <width>60</width>
+              <height>40</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <pointsize>22</pointsize>
@@ -125,13 +175,19 @@
           </item>
           <item>
            <widget class="QPushButton" name="nextButton">
+            <property name="minimumSize">
+             <size>
+              <width>60</width>
+              <height>40</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <pointsize>24</pointsize>
              </font>
             </property>
             <property name="text">
-             <string>▶</string>
+             <string>⏭</string>
             </property>
            </widget>
           </item>
@@ -188,20 +244,6 @@
        </layout>
       </item>
       <item>
-       <widget class="QLabel" name="time">
-        <property name="text">
-         <string>0:00</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSlider" name="horizontalSlider">
-        <property name="orientation">
-         <enum>Qt::Orientation::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QTextEdit" name="textEdit_2">
         <property name="enabled">
          <bool>false</bool>
@@ -215,7 +257,7 @@
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>60</height>
+          <height>20</height>
          </size>
         </property>
         <property name="styleSheet">
@@ -241,7 +283,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>505</width>
+     <width>656</width>
      <height>21</height>
     </rect>
    </property>

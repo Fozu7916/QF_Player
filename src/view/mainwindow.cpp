@@ -14,13 +14,7 @@
 #include <QtConcurrent>
 #include <QFuture>
 #include "../controller/playercontroller.h"
-#ifdef HAVE_MPRIS
-#include "../integration/mpris_service.h"
-#endif
-#ifdef _WIN32
-#include <QAbstractNativeEventFilter>
-#include <windows.h>
-#endif
+
 #include "../integration/mediaosd.h"
 
 const int DEFAULT_VOLUME = 50;
@@ -47,6 +41,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(playerController.get(), &PlayerController::setCurrentRow, this, &MainWindow::setCurrentRow);
     connect(playerController.get(), &PlayerController::playOrStopUI, this, &MainWindow::onPlayOrStopUI);
 
+    //nekoarc
+    gifMovie = new QMovie(":/images/necoarc.gif");
+    ui->nekoArcLabel->setMovie(gifMovie);
+    gifMovie->start();
+    //nekoarc
+
     QSettings settings("QF_Player", "QF_Player");
     int savedVolume = settings.value("audio/volume", DEFAULT_VOLUME).toInt();
 
@@ -55,56 +55,16 @@ MainWindow::MainWindow(QWidget *parent)
     int lastIndex = settings.value("player/lastIndex", -1).toInt();
     if (lastIndex >= 0 && lastIndex < static_cast<int>(playerController->getTracks().size())) {
         playerController->setCurrentIndex(lastIndex);
-        setCurrentRow(lastIndex);
         ui->horizontalSlider->setMaximum(playerController->getTracks()[lastIndex].getLength());
         ui->horizontalSlider->setValue(0);
         ui->time->setText("0:00");
+        ui->trackList->setCurrentRow(lastIndex);
     }
 
     ui->volumeSlider->setValue(savedVolume);
     ui->volume->setText(QString::number(savedVolume));
 
-#ifdef HAVE_MPRIS
-    mprisService = new MprisService(playerController.get(), this);
-#endif
 
-#ifdef _WIN32
-    osd = new MediaOsd(nullptr);
-    class WinMediaKeysFilter : public QAbstractNativeEventFilter {
-    public:
-        explicit WinMediaKeysFilter(MainWindow* w) : window(w) {}
-        bool nativeEventFilter(const QByteArray &eventType, void *message, qintptr *result) override {
-            if (eventType == "windows_generic_MSG") {
-                MSG* msg = static_cast<MSG*>(message);
-                if (msg && msg->message == WM_APPCOMMAND) {
-                    int cmd = GET_APPCOMMAND_LPARAM(msg->lParam);
-                    switch (cmd) {
-                        case APPCOMMAND_MEDIA_PLAY_PAUSE:
-                            window->on_playOrStopButton_clicked();
-                            if (window->osd) window->osd->showMessage("⏯", "Play/Pause");
-                            break;
-                        case APPCOMMAND_MEDIA_NEXTTRACK:
-                            window->on_nextButton_clicked();
-                            if (window->osd) window->osd->showMessage("▶▶", "Next");
-                            break;
-                        case APPCOMMAND_MEDIA_PREVIOUSTRACK:
-                            window->on_prevButton_clicked();
-                            if (window->osd) window->osd->showMessage("◀◀", "Previous");
-                            break;
-                        default:
-                            return false;
-                    }
-                    if (result) *result = 1;
-                    return true;
-                }
-            }
-            return false;
-        }
-    private:
-        MainWindow* window;
-    };
-    qApp->installNativeEventFilter(new WinMediaKeysFilter(this));
-#endif
 }
 
 MainWindow::~MainWindow(){
@@ -223,4 +183,8 @@ void MainWindow::onPlayOrStopUI(bool isPlaying) {
     }
 }
 
+void MainWindow::on_pushButton_clicked(bool checked)
+{
+    playerController->setRandom(checked);
+}
 
