@@ -1,18 +1,18 @@
-#pragma once
+// #pragma once
 
-#include <QObject>
+// #include <QObject>
 
-class PlayerController;
+// class PlayerController;
 
-class MprisService : public QObject {
-    Q_OBJECT
-public:
-    explicit MprisService(PlayerController* controller, QObject* parent = nullptr);
-    ~MprisService() override = default;
+// class MprisService : public QObject {
+//     Q_OBJECT
+// public:
+//     explicit MprisService(PlayerController* controller, QObject* parent = nullptr);
+//     ~MprisService() override = default;
 
-private:
-    PlayerController* m_controller;
-    void registerOnSessionBus();
-};
+// private:
+//     PlayerController* m_controller;
+//     void registerOnSessionBus();
+// };
 
 

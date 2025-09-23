@@ -65,8 +65,6 @@ MainWindow::MainWindow(QWidget *parent)
 #ifdef _WIN32
     m_osd = new MediaOsd(this);
     registerGlobalMediaHotkeys();
-#else
-    m_osd = nullptr;
 #endif
 }
 

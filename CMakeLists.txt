@@ -20,25 +20,39 @@ endif()
 # Указываем пути к mpv
 set(MPV_DIR "${CMAKE_SOURCE_DIR}/mpv")
 set(MPV_INCLUDE_DIR "${MPV_DIR}/include")
-set(MPV_LIB_DIR "${MPV_DIR}")
+set(MPV_LIB_DIR "${MPV_DIR}/lib")
 
-# Проверка существования файлов mpv
-if(NOT EXISTS "${MPV_DIR}/libmpv-2.dll")
-    message(FATAL_ERROR "libmpv-2.dll not found in ${MPV_DIR}")
+if(WIN32)
+    # Проверка файлов Windows
+    if(NOT EXISTS "${MPV_DIR}/libmpv-2.dll")
+        message(FATAL_ERROR "libmpv-2.dll not found in ${MPV_DIR}")
+    endif()
+    if(NOT EXISTS "${MPV_DIR}/libmpv.dll.a")
+        message(FATAL_ERROR "libmpv.dll.a not found in ${MPV_DIR}")
+    endif()
+
+    add_library(mpv SHARED IMPORTED)
+    set_target_properties(mpv PROPERTIES
+        IMPORTED_IMPLIB "${MPV_DIR}/libmpv.dll.a"
+        IMPORTED_LOCATION "${MPV_DIR}/libmpv-2.dll"
+    )
+else()
+    # Linux / Unix
+    set(MPV_SO "")
+    file(GLOB MPV_SO_FILES "${MPV_LIB_DIR}/libmpv.so*")
+    list(GET MPV_SO_FILES 0 MPV_SO)
+    if(NOT MPV_SO)
+        message(FATAL_ERROR "libmpv.so not found in ${MPV_LIB_DIR}")
+    endif()
+
+    add_library(mpv SHARED IMPORTED)
+    set_target_properties(mpv PROPERTIES
+        IMPORTED_LOCATION "${MPV_SO}"
+        INTERFACE_INCLUDE_DIRECTORIES "${MPV_INCLUDE_DIR}"
+    )
 endif()
 
-if(NOT EXISTS "${MPV_DIR}/libmpv.dll.a")
-    message(FATAL_ERROR "libmpv.dll.a not found in ${MPV_DIR}")
-endif()
-
-# Добавляем библиотеку mpv
-add_library(mpv SHARED IMPORTED)
-set_target_properties(mpv PROPERTIES
-    IMPORTED_IMPLIB "${MPV_DIR}/libmpv.dll.a"
-    IMPORTED_LOCATION "${MPV_DIR}/libmpv-2.dll"
-)
-target_include_directories(mpv INTERFACE "${MPV_INCLUDE_DIR}")
-
+# Добавляем исходники
 set(PROJECT_SOURCES
     src/main.cpp
     src/view/mainwindow.cpp
@@ -62,17 +76,13 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     )
 else()
     if(ANDROID)
-        add_library(QF_Player SHARED
-            ${PROJECT_SOURCES}
-        )
+        add_library(QF_Player SHARED ${PROJECT_SOURCES})
     else()
-        add_executable(QF_Player
-            ${PROJECT_SOURCES}
-        )
+        add_executable(QF_Player ${PROJECT_SOURCES})
     endif()
 endif()
 
-# Линкуем как Qt, так и mpv
+# Линкуем Qt и mpv
 target_link_libraries(QF_Player PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Multimedia

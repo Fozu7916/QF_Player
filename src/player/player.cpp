@@ -3,6 +3,9 @@
 
 Player::Player(QObject *parent) : QObject(parent)
 {
+#if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
+    std::setlocale(LC_NUMERIC, "C");
+#endif
     mpv = mpv_create();
     if (!mpv) {
         qFatal("Could not create mpv context");
@@ -12,6 +15,9 @@ Player::Player(QObject *parent) : QObject(parent)
     mpv_set_option_string(mpv, "input-default-bindings", "yes");
     mpv_set_option_string(mpv, "vo", "null"); // No video output
 
+#if defined(__linux__) || defined(__unix__)
+    mpv_set_option_string(mpv, "ao", "pulse"); // Linux: PulseAudio
+#endif
     if (mpv_initialize(mpv) < 0) {
         qFatal("Could not initialize mpv");
     }
