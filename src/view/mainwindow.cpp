@@ -29,7 +29,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->trackList, &QListWidget::itemClicked,
             this, &MainWindow::on_TrackLists_itemClicked);
-
     connect(ui->volumeSlider, &QSlider::valueChanged, this, [this](int value){
         ui->volume->setText(QString::number(value));
         playerController->setVolume(value);
