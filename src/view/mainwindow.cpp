@@ -15,8 +15,6 @@
 #include <QFuture>
 #include "../controller/playercontroller.h"
 
-#include "../integration/mediaosd.h"
-
 const int DEFAULT_VOLUME = 50;
 const QString PLAYLIST_FILENAME = "tracks.txt";
 
@@ -63,7 +61,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->volumeSlider->setValue(savedVolume);
     ui->volume->setText(QString::number(savedVolume));
-
 
 }
 

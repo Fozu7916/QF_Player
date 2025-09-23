@@ -9,11 +9,6 @@
 #include <QTimer>
 #include <QMovie>
 
-#ifdef HAVE_MPRIS
-class MprisService;
-#endif
-class MediaOsd;
-
 namespace Ui {
 class MainWindow;
 }
@@ -50,10 +45,6 @@ private:
     std::unique_ptr<PlayerController> playerController;
     void updateSliderAndTimerForIndex(int index);
     QMovie* gifMovie;
-#ifdef HAVE_MPRIS
-    MprisService* mprisService = nullptr;
-#endif
-    MediaOsd* osd = nullptr;
 };
 
 #endif // MAINWINDOW_H
