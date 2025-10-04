@@ -31,8 +31,10 @@ public:
     void cleanup();
 #ifdef __linux__
     bool isInitialized() const { return m_initialized; }
+    QString getStatus() const;
 #else
     bool isInitialized() const { return false; }
+    QString getStatus() const { return "Not supported"; }
 #endif
 
 signals:
@@ -44,6 +46,7 @@ signals:
     
 private slots:
     void checkForEvents();
+    void onMediaKeyPressed(const QString& key, const QVariantMap& metadata);
     
 private:
 #ifdef __linux__

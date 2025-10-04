@@ -34,32 +34,51 @@ bool LinuxMediaKeys::initialize() {
 #ifdef __linux__
     if (m_initialized) return true;
     
-    qCDebug(linuxMediaKeys) << "Инициализация Linux медиа-клавиш...";
+    qDebug() << "LinuxMediaKeys: Инициализация медиа-клавиш...";
     
     // Определяем тип дисплей-сервера
     if (!detectDisplayServer()) {
-        qCWarning(linuxMediaKeys) << "Не удалось определить дисплей-сервер";
+        qWarning() << "LinuxMediaKeys: Не удалось определить дисплей-сервер";
         return false;
     }
     
-    // Пробуем инициализировать X11
-    if (setupX11()) {
-        qCDebug(linuxMediaKeys) << "X11 инициализация успешна";
-        m_initialized = true;
-        return true;
+    // Определяем приоритет инициализации
+    const char* waylandDisplay = getenv("WAYLAND_DISPLAY");
+    const char* xdgSessionType = getenv("XDG_SESSION_TYPE");
+    bool preferWayland = waylandDisplay || (xdgSessionType && strcmp(xdgSessionType, "wayland") == 0);
+    
+    if (preferWayland) {
+        // Пробуем Wayland сначала
+        if (setupWayland()) {
+            qDebug() << "LinuxMediaKeys: Wayland инициализация успешна";
+            m_initialized = true;
+            return true;
+        }
+        // Fallback на X11
+        if (setupX11()) {
+            qDebug() << "LinuxMediaKeys: X11 fallback инициализация успешна";
+            m_initialized = true;
+            return true;
+        }
+    } else {
+        // Пробуем X11 сначала
+        if (setupX11()) {
+            qDebug() << "LinuxMediaKeys: X11 инициализация успешна";
+            m_initialized = true;
+            return true;
+        }
+        // Fallback на Wayland
+        if (setupWayland()) {
+            qDebug() << "LinuxMediaKeys: Wayland fallback инициализация успешна";
+            m_initialized = true;
+            return true;
+        }
     }
     
-    // Пробуем инициализировать Wayland (будущая реализация)
-    if (setupWayland()) {
-        qCDebug(linuxMediaKeys) << "Wayland инициализация успешна";
-        m_initialized = true;
-        return true;
-    }
-    
-    qCWarning(linuxMediaKeys) << "Не удалось инициализировать ни X11, ни Wayland";
+    qWarning() << "LinuxMediaKeys: Не удалось инициализировать ни X11, ни Wayland";
     return false;
 #else
-    qCDebug(linuxMediaKeys) << "Linux медиа-клавиши не поддерживаются на этой платформе";
+    qDebug() << "LinuxMediaKeys: Медиа-клавиши не поддерживаются на этой платформе";
     return false;
 #endif
 }
@@ -68,7 +87,7 @@ void LinuxMediaKeys::cleanup() {
 #ifdef __linux__
     if (!m_initialized) return;
     
-    qCDebug(linuxMediaKeys) << "Очистка Linux медиа-клавиш...";
+    qDebug() << "LinuxMediaKeys: Очистка медиа-клавиш...";
     
     cleanupX11();
     cleanupWayland();
@@ -79,7 +98,7 @@ void LinuxMediaKeys::cleanup() {
     }
     
     m_initialized = false;
-    qCDebug(linuxMediaKeys) << "Очистка завершена";
+    qDebug() << "LinuxMediaKeys: Очистка завершена";
 #endif
 }
 
@@ -103,7 +122,7 @@ void LinuxMediaKeys::checkForEvents() {
 void LinuxMediaKeys::grabMediaKeys() {
     if (!m_display || !m_rootWindow) return;
     
-    qCDebug(linuxMediaKeys) << "Захват медиа-клавиш...";
+    qDebug() << "LinuxMediaKeys: Захват медиа-клавиш...";
     
     // Получаем коды медиа-клавиш
     KeyCode playPauseKey = getKeyCode("XF86AudioPlay");
@@ -116,52 +135,32 @@ void LinuxMediaKeys::grabMediaKeys() {
     // Захватываем клавиши с проверкой ошибок
     if (playPauseKey) {
         int result = XGrabKey(m_display, playPauseKey, AnyModifier, m_rootWindow, False, GrabModeAsync, GrabModeAsync);
-        if (result == Success) {
-            grabbedCount++;
-            qCDebug(linuxMediaKeys) << "Play/Pause клавиша захвачена";
-        } else {
-            qCWarning(linuxMediaKeys) << "Не удалось захватить Play/Pause клавишу";
-        }
+        if (result == Success) { grabbedCount++; qDebug() << "LinuxMediaKeys: Play/Pause клавиша захвачена"; } else { qWarning() << "LinuxMediaKeys: Не удалось захватить Play/Pause клавишу"; }
     }
     
     if (nextKey) {
         int result = XGrabKey(m_display, nextKey, AnyModifier, m_rootWindow, False, GrabModeAsync, GrabModeAsync);
-        if (result == Success) {
-            grabbedCount++;
-            qCDebug(linuxMediaKeys) << "Next клавиша захвачена";
-        } else {
-            qCWarning(linuxMediaKeys) << "Не удалось захватить Next клавишу";
-        }
+        if (result == Success) { grabbedCount++; qDebug() << "LinuxMediaKeys: Next клавиша захвачена"; } else { qWarning() << "LinuxMediaKeys: Не удалось захватить Next клавишу"; }
     }
     
     if (prevKey) {
         int result = XGrabKey(m_display, prevKey, AnyModifier, m_rootWindow, False, GrabModeAsync, GrabModeAsync);
-        if (result == Success) {
-            grabbedCount++;
-            qCDebug(linuxMediaKeys) << "Previous клавиша захвачена";
-        } else {
-            qCWarning(linuxMediaKeys) << "Не удалось захватить Previous клавишу";
-        }
+        if (result == Success) { grabbedCount++; qDebug() << "LinuxMediaKeys: Previous клавиша захвачена"; } else { qWarning() << "LinuxMediaKeys: Не удалось захватить Previous клавишу"; }
     }
     
     if (stopKey) {
         int result = XGrabKey(m_display, stopKey, AnyModifier, m_rootWindow, False, GrabModeAsync, GrabModeAsync);
-        if (result == Success) {
-            grabbedCount++;
-            qCDebug(linuxMediaKeys) << "Stop клавиша захвачена";
-        } else {
-            qCWarning(linuxMediaKeys) << "Не удалось захватить Stop клавишу";
-        }
+        if (result == Success) { grabbedCount++; qDebug() << "LinuxMediaKeys: Stop клавиша захвачена"; } else { qWarning() << "LinuxMediaKeys: Не удалось захватить Stop клавишу"; }
     }
     
     XFlush(m_display);
-    qCDebug(linuxMediaKeys) << "Захвачено клавиш:" << grabbedCount << "из 4";
+    qDebug() << "LinuxMediaKeys: Захвачено клавиш:" << grabbedCount << "из 4";
 }
 
 void LinuxMediaKeys::ungrabMediaKeys() {
     if (!m_display || !m_rootWindow) return;
     
-    qCDebug(linuxMediaKeys) << "Освобождение медиа-клавиш...";
+    qDebug() << "LinuxMediaKeys: Освобождение медиа-клавиш...";
     
     KeyCode playPauseKey = getKeyCode("XF86AudioPlay");
     KeyCode nextKey = getKeyCode("XF86AudioNext");
@@ -182,7 +181,7 @@ void LinuxMediaKeys::ungrabMediaKeys() {
     }
     
     XFlush(m_display);
-    qCDebug(linuxMediaKeys) << "Медиа-клавиши освобождены";
+    qDebug() << "LinuxMediaKeys: Медиа-клавиши освобождены";
 }
 
 KeyCode LinuxMediaKeys::getKeyCode(const char* keyName) {
@@ -190,7 +189,7 @@ KeyCode LinuxMediaKeys::getKeyCode(const char* keyName) {
     
     KeySym keysym = XStringToKeysym(keyName);
     if (keysym == NoSymbol) {
-        qCWarning(linuxMediaKeys) << "Не удалось найти клавишу" << keyName;
+        qWarning() << "LinuxMediaKeys: Не удалось найти клавишу" << keyName;
         return 0;
     }
     
@@ -201,20 +200,20 @@ bool LinuxMediaKeys::setupX11() {
     // Получаем X11 display
     m_display = QX11Info::display();
     if (!m_display) {
-        qCWarning(linuxMediaKeys) << "Не удалось получить X11 display";
+        qWarning() << "LinuxMediaKeys: Не удалось получить X11 display";
         return false;
     }
     
     m_rootWindow = DefaultRootWindow(m_display);
     if (!m_rootWindow) {
-        qCWarning(linuxMediaKeys) << "Не удалось получить root window";
+        qWarning() << "LinuxMediaKeys: Не удалось получить root window";
         return false;
     }
     
     // Получаем файловый дескриптор для событий
     m_x11Fd = ConnectionNumber(m_display);
     if (m_x11Fd < 0) {
-        qCWarning(linuxMediaKeys) << "Не удалось получить X11 файловый дескриптор";
+        qWarning() << "LinuxMediaKeys: Не удалось получить X11 файловый дескриптор";
         return false;
     }
     
@@ -225,7 +224,7 @@ bool LinuxMediaKeys::setupX11() {
     // Захватываем медиа-клавиши
     grabMediaKeys();
     
-    qCDebug(linuxMediaKeys) << "X11 настройка завершена, fd:" << m_x11Fd;
+    qDebug() << "LinuxMediaKeys: X11 настройка завершена, fd:" << m_x11Fd;
     return true;
 }
 
@@ -239,28 +238,88 @@ void LinuxMediaKeys::cleanupX11() {
 }
 
 bool LinuxMediaKeys::setupWayland() {
-    // TODO: Реализация Wayland через D-Bus
-    qCDebug(linuxMediaKeys) << "Wayland поддержка пока не реализована";
-    return false;
+    qDebug() << "LinuxMediaKeys: Инициализация Wayland через D-Bus...";
+    
+    // Проверяем доступность D-Bus
+    if (!QDBusConnection::sessionBus().isConnected()) {
+        qWarning() << "LinuxMediaKeys: D-Bus сессия недоступна";
+        return false;
+    }
+    
+    // Подключаемся к org.freedesktop.portal.MediaKeys
+    QString service = "org.freedesktop.portal.Desktop";
+    QString path = "/org/freedesktop/portal/desktop";
+    QString interface = "org.freedesktop.portal.MediaKeys";
+    
+    QDBusInterface dbusInterface(service, path, interface, QDBusConnection::sessionBus(), this);
+    
+    if (!dbusInterface.isValid()) {
+        qWarning() << "LinuxMediaKeys: Не удалось подключиться к D-Bus интерфейсу MediaKeys";
+        return false;
+    }
+    
+    // Регистрируем приложение для получения медиа-событий
+    QDBusMessage registerCall = dbusInterface.call("RegisterMediaKeys", QApplication::applicationName());
+    
+    if (registerCall.type() == QDBusMessage::ErrorMessage) {
+        qWarning() << "LinuxMediaKeys: Не удалось зарегистрировать медиа-клавиши:" << registerCall.errorMessage();
+        return false;
+    }
+    
+    // Подключаемся к сигналам медиа-клавиш
+    QDBusConnection::sessionBus().connect(
+        service, path, interface, "MediaKeyPressed",
+        this, SLOT(onMediaKeyPressed(QString, QVariantMap))
+    );
+    
+    qDebug() << "LinuxMediaKeys: Wayland медиа-клавиши успешно инициализированы";
+    return true;
 }
 
 void LinuxMediaKeys::cleanupWayland() {
-    // TODO: Очистка Wayland ресурсов
+    qDebug() << "LinuxMediaKeys: Очистка Wayland ресурсов...";
+    
+    if (QDBusConnection::sessionBus().isConnected()) {
+        QString service = "org.freedesktop.portal.Desktop";
+        QString path = "/org/freedesktop/portal/desktop";
+        QString interface = "org.freedesktop.portal.MediaKeys";
+        
+        QDBusInterface dbusInterface(service, path, interface, QDBusConnection::sessionBus(), this);
+        
+        if (dbusInterface.isValid()) {
+            // Отменяем регистрацию медиа-клавиш
+            QDBusMessage unregisterCall = dbusInterface.call("UnregisterMediaKeys", QApplication::applicationName());
+            
+            if (unregisterCall.type() == QDBusMessage::ErrorMessage) {
+                qWarning() << "LinuxMediaKeys: Ошибка при отмене регистрации медиа-клавиш:" << unregisterCall.errorMessage();
+            }
+        }
+        
+        // Отключаемся от сигналов
+        QDBusConnection::sessionBus().disconnect(
+            service, path, interface, "MediaKeyPressed",
+            this, SLOT(onMediaKeyPressed(QString, QVariantMap))
+        );
+    }
+    
+    qDebug() << "LinuxMediaKeys: Wayland ресурсы очищены";
 }
 
 bool LinuxMediaKeys::detectDisplayServer() {
     const char* waylandDisplay = getenv("WAYLAND_DISPLAY");
     const char* x11Display = getenv("DISPLAY");
+    const char* xdgSessionType = getenv("XDG_SESSION_TYPE");
     
-    if (waylandDisplay) {
-        qCDebug(linuxMediaKeys) << "Обнаружен Wayland дисплей:" << waylandDisplay;
+    // Приоритет: Wayland > X11
+    if (waylandDisplay || (xdgSessionType && strcmp(xdgSessionType, "wayland") == 0)) {
+        qDebug() << "LinuxMediaKeys: Обнаружен Wayland дисплей:" << (waylandDisplay ? waylandDisplay : "через XDG_SESSION_TYPE");
         return true;
     } else if (x11Display) {
-        qCDebug(linuxMediaKeys) << "Обнаружен X11 дисплей:" << x11Display;
+        qDebug() << "LinuxMediaKeys: Обнаружен X11 дисплей:" << x11Display;
         return true;
     }
     
-    qCWarning(linuxMediaKeys) << "Не обнаружен ни Wayland, ни X11 дисплей";
+    qWarning() << "LinuxMediaKeys: Не обнаружен ни Wayland, ни X11 дисплей";
     return false;
 }
 
@@ -272,19 +331,19 @@ void LinuxMediaKeys::handleKeyPress(KeyCode keycode) {
     KeyCode stopKey = getKeyCode("XF86AudioStop");
     
     if (keycode == playPauseKey) {
-        qCDebug(linuxMediaKeys) << "Play/Pause нажата";
+        qDebug() << "LinuxMediaKeys: Play/Pause нажата";
         emit mediaKeyPressed(PlayPause);
         emit playPausePressed();
     } else if (keycode == nextKey) {
-        qCDebug(linuxMediaKeys) << "Next нажата";
+        qDebug() << "LinuxMediaKeys: Next нажата";
         emit mediaKeyPressed(Next);
         emit nextPressed();
     } else if (keycode == prevKey) {
-        qCDebug(linuxMediaKeys) << "Previous нажата";
+        qDebug() << "LinuxMediaKeys: Previous нажата";
         emit mediaKeyPressed(Previous);
         emit prevPressed();
     } else if (keycode == stopKey) {
-        qCDebug(linuxMediaKeys) << "Stop нажата";
+        qDebug() << "LinuxMediaKeys: Stop нажата";
         emit mediaKeyPressed(Stop);
         emit stopPressed();
     }
@@ -300,5 +359,44 @@ bool LinuxMediaKeys::isKeyGrabbed(KeyCode keycode) {
     // Это упрощенная проверка, в реальности нужно более сложная логика
     XFree(keymapEvent);
     return true;
+}
+
+void LinuxMediaKeys::onMediaKeyPressed(const QString& key, const QVariantMap& metadata) {
+    qDebug() << "LinuxMediaKeys: Wayland медиа-клавиша нажата:" << key;
+    
+    // Обрабатываем различные типы медиа-клавиш
+    if (key == "Play" || key == "Pause" || key == "PlayPause") {
+        qDebug() << "LinuxMediaKeys: Play/Pause через Wayland";
+        emit mediaKeyPressed(PlayPause);
+        emit playPausePressed();
+    } else if (key == "Next") {
+        qDebug() << "LinuxMediaKeys: Next через Wayland";
+        emit mediaKeyPressed(Next);
+        emit nextPressed();
+    } else if (key == "Previous") {
+        qDebug() << "LinuxMediaKeys: Previous через Wayland";
+        emit mediaKeyPressed(Previous);
+        emit prevPressed();
+    } else if (key == "Stop") {
+        qDebug() << "LinuxMediaKeys: Stop через Wayland";
+        emit mediaKeyPressed(Stop);
+        emit stopPressed();
+    } else {
+        qDebug() << "LinuxMediaKeys: Неизвестная медиа-клавиша:" << key;
+    }
+}
+
+QString LinuxMediaKeys::getStatus() const {
+    if (!m_initialized) {
+        return "Не инициализирован";
+    }
+    
+    if (m_display) {
+        return "X11 активен";
+    } else if (QDBusConnection::sessionBus().isConnected()) {
+        return "Wayland активен";
+    }
+    
+    return "Неизвестное состояние";
 }
 #endif

@@ -331,7 +331,7 @@ void MainWindow::setupLinuxMediaKeys() {
     if (!m_linuxMediaKeys->initialize()) {
         qWarning() << "MainWindow: Не удалось инициализировать Linux медиа-клавиши";
     } else {
-        qDebug() << "MainWindow: Linux медиа-клавиши инициализированы успешно";
+        qDebug() << "MainWindow: Linux медиа-клавиши инициализированы успешно, статус:" << m_linuxMediaKeys->getStatus();
     }
 }
 
