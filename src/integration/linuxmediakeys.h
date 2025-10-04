@@ -29,8 +29,12 @@ public:
     
     bool initialize();
     void cleanup();
+#ifdef __linux__
     bool isInitialized() const { return m_initialized; }
-    
+#else
+    bool isInitialized() const { return false; }
+#endif
+
 signals:
     void mediaKeyPressed(MediaKey key);
     void playPausePressed();
