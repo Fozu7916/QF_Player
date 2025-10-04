@@ -156,7 +156,7 @@ void MainWindow::addTrackToList(const QString& name) {
 }
 
 void MainWindow::deleteTrackFromList(int index) {
-    if( index < 0 or index >= ui->trackList->count()) return;
+    if(index < 0 or index >= ui->trackList->count()) return;
     ui->trackList->takeItem(index);
     if(index > 0){
         playerController->setCurrentIndex(index-1);
@@ -167,7 +167,7 @@ void MainWindow::deleteTrackFromList(int index) {
 }
     
 void MainWindow::setCurrentRow(int index) {
-    if ( index < 0 or index < ui->trackList->count()) return;
+    if (index < 0) return;
     ui->trackList->setCurrentRow(index);
 }
 
