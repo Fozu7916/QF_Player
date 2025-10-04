@@ -2,15 +2,15 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#ifdef _WIN32
+#include "../integration/mediaosd.h"
+#endif
 #include "../player/player.h"
 #include "../model/track.h"
 #include "../controller/playercontroller.h"
 #include <QListWidgetItem>
 #include <QTimer>
 #include <QMovie>
-#ifdef _WIN32
-#include "../integration/mediaosd.h"
-#endif
 
 namespace Ui {
 class MainWindow;
@@ -49,7 +49,8 @@ private slots:
     void on_prevButton_clicked();
     void on_horizontalSlider_sliderMoved(int position);
     void on_pushButton_clicked(bool checked);
-
+signals:
+    void trackReadyToAdd(const QString &filePath, int durationSec);
 private:
     Ui::MainWindow *ui;
     std::vector<Track> trackList;

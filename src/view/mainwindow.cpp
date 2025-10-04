@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "../controller/playercontroller.h"
 #include <QFileDialog>
 #include <QtMultimedia/QMediaPlayer>
 #include <QEventLoop>
@@ -13,7 +14,6 @@
 #include <QSettings>
 #include <QtConcurrent>
 #include <QFuture>
-#include "../controller/playercontroller.h"
 
 const int DEFAULT_VOLUME = 50;
 const QString PLAYLIST_FILENAME = "tracks.txt";
@@ -27,25 +27,24 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     if (statusBar()) statusBar()->hide();
 
-    connect(ui->trackList, &QListWidget::itemClicked,
-            this, &MainWindow::on_TrackLists_itemClicked);
-    connect(ui->volumeSlider, &QSlider::valueChanged, this, [this](int value){
-        ui->volume->setText(QString::number(value));
-        playerController->setVolume(value);
-    });
+
+    QSettings settings("QF_Player", "QF_Player");
+    int savedVolume = settings.value("audio/volume", DEFAULT_VOLUME).toInt();
+    connect(ui->trackList, &QListWidget::itemClicked, this, &MainWindow::on_TrackLists_itemClicked);
     connect(playerController.get(), &PlayerController::trackDeleted, this, &MainWindow::deleteTrackFromList);
     connect(playerController.get(), &PlayerController::trackLoaded, this, &MainWindow::addTrackToList);
     connect(playerController.get(), &PlayerController::setCurrentRow, this, &MainWindow::setCurrentRow);
     connect(playerController.get(), &PlayerController::playOrStopUI, this, &MainWindow::onPlayOrStopUI);
+    connect(ui->volumeSlider, &QSlider::valueChanged, this, [this](int value){
+        ui->volume->setText(QString::number(value));
+        playerController->setVolume(value);
+    });
 
     //nekoarc
     gifMovie = new QMovie(":/images/necoarc.gif");
     ui->nekoArcLabel->setMovie(gifMovie);
     gifMovie->start();
     //nekoarc
-
-    QSettings settings("QF_Player", "QF_Player");
-    int savedVolume = settings.value("audio/volume", DEFAULT_VOLUME).toInt();
 
     ui->volumeSlider->setRange(0, 100);
     playerController->loadTracks(PLAYLIST_FILENAME);
@@ -57,7 +56,6 @@ MainWindow::MainWindow(QWidget *parent)
         ui->time->setText("0:00");
         ui->trackList->setCurrentRow(lastIndex);
     }
-
     ui->volumeSlider->setValue(savedVolume);
     ui->volume->setText(QString::number(savedVolume));
 
@@ -65,6 +63,12 @@ MainWindow::MainWindow(QWidget *parent)
     m_osd = new MediaOsd(this);
     registerGlobalMediaHotkeys();
 #endif
+
+
+connect(this, &MainWindow::trackReadyToAdd, [this](const QString &filePath, int dur){
+    playerController->addTrack(filePath, dur);
+});
+
 }
 
 MainWindow::~MainWindow(){
@@ -72,6 +76,7 @@ MainWindow::~MainWindow(){
     settings.setValue("audio/volume", ui->volumeSlider->value());
     settings.setValue("player/lastIndex", playerController->getCurrentIndex());
 
+    delete gifMovie;
     playerController->saveTracks(PLAYLIST_FILENAME);
     delete ui;
 }
@@ -80,30 +85,53 @@ void MainWindow::on_playOrStopButton_clicked(){
     playerController->playOrStop();
 }
 
+// void MainWindow::on_addButton_clicked(){
+//     QStringList filePaths = QFileDialog::getOpenFileNames(this, "Выберите треки", "", "Аудио файлы (*.mp3 *.wav *.flac)");
+//     for (const QString &filePath : filePaths) {
+//         if (filePath.isEmpty()) continue;
+//         QtConcurrent::run([this, filePath]() {
+//             int dur = getDuration(filePath);
+//             QMetaObject::invokeMethod(this, [this, filePath, dur]() {
+//                 playerController->addTrack(filePath, dur);
+//             }, Qt::QueuedConnection);
+//         });
+//     }
+// }
+
+// int MainWindow::getDuration(QString filePath){
+//         QMediaPlayer mediaPlayer;
+//         mediaPlayer.setSource(QUrl::fromLocalFile(filePath));
+//         QEventLoop loop;
+//         QObject::connect(&mediaPlayer, &QMediaPlayer::durationChanged, &loop, &QEventLoop::quit);
+//         mediaPlayer.play();
+//         loop.exec();
+//         qint64 durationMs = mediaPlayer.duration();
+//         mediaPlayer.stop();
+//         int durationSec = static_cast<int>(durationMs / 1000);
+//         return durationSec;
+// }
+
 void MainWindow::on_addButton_clicked(){
     QStringList filePaths = QFileDialog::getOpenFileNames(this, "Выберите треки", "", "Аудио файлы (*.mp3 *.wav *.flac)");
     for (const QString &filePath : filePaths) {
         if (filePath.isEmpty()) continue;
         QtConcurrent::run([this, filePath]() {
-            int dur = getDuration(filePath);
-            QMetaObject::invokeMethod(this, [this, filePath, dur]() {
-                playerController->addTrack(filePath, dur);
-            }, Qt::QueuedConnection);
+            int dur = getDuration(filePath); // блокируем только поток QtConcurrent
+            emit trackReadyToAdd(filePath, dur); // возвращаем в основной поток
         });
     }
 }
 
 int MainWindow::getDuration(QString filePath){
-        QMediaPlayer mediaPlayer;
-        mediaPlayer.setSource(QUrl::fromLocalFile(filePath));
-        QEventLoop loop;
-        QObject::connect(&mediaPlayer, &QMediaPlayer::durationChanged, &loop, &QEventLoop::quit);
-        mediaPlayer.play();
-        loop.exec();
-        qint64 durationMs = mediaPlayer.duration();
-        mediaPlayer.stop();
-        int durationSec = static_cast<int>(durationMs / 1000);
-        return durationSec;
+    QMediaPlayer mediaPlayer;
+    QEventLoop loop;
+    QObject::connect(&mediaPlayer, &QMediaPlayer::durationChanged, &loop, &QEventLoop::quit);
+    mediaPlayer.setSource(QUrl::fromLocalFile(filePath));
+    mediaPlayer.play();
+    loop.exec();
+    int durationSec = static_cast<int>(mediaPlayer.duration() / 1000);
+    mediaPlayer.stop();
+    return durationSec;
 }
 
 void MainWindow::on_deleteButton_clicked(){
@@ -165,8 +193,8 @@ void MainWindow::addTrackToList(const QString& name) {
 
 
 void MainWindow::deleteTrackFromList(int index) {
-    if (index >= 0 && index < ui->trackList->count())
-        ui->trackList->takeItem(index);
+    if( index < 0 or index >= ui->trackList->count()) return;
+    ui->trackList->takeItem(index);
 }
     
 void MainWindow::setCurrentRow(int index) {
