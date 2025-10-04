@@ -46,7 +46,7 @@ signals:
     
 private slots:
     void checkForEvents();
-    void onMediaKeyPressed(const QString& key, const QVariantMap& metadata);
+    //void onMediaKeyPressed(const QString& key, const QVariantMap& metadata);
     
 private:
 #ifdef __linux__
