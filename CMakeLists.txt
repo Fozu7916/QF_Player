@@ -62,6 +62,8 @@ set(PROJECT_SOURCES
     src/controller/durationcontroller.cpp
     src/integration/mediaosd.h
     src/integration/mediaosd.cpp
+    src/integration/linuxmediakeys.h
+    src/integration/linuxmediakeys.cpp
     src/controller/playercontroller.h
     src/controller/playercontroller.cpp
     resources/resources.qrc
@@ -92,6 +94,13 @@ target_link_libraries(QF_Player PRIVATE
 if(UNIX AND NOT APPLE AND TARGET Qt${QT_VERSION_MAJOR}::DBus)
   target_link_libraries(QF_Player PRIVATE Qt${QT_VERSION_MAJOR}::DBus)
   target_compile_definitions(QF_Player PRIVATE HAVE_MPRIS=1)
+endif()
+
+# Linux X11 для медиа-клавиш
+if(UNIX AND NOT APPLE)
+  find_package(X11 REQUIRED)
+  target_link_libraries(QF_Player PRIVATE X11)
+  target_compile_definitions(QF_Player PRIVATE HAVE_X11=1)
 endif()
 
 # Копирование DLL в папку сборки (Windows)
