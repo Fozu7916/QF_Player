@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <QObject>
+#include <random>
 
 class PlayerController : public QObject
 {
@@ -21,6 +22,7 @@ public:
     void playNext();
     void playOrStop();
     void setVolume(int value);
+    bool canPlayTrack(int index);
     // Getters and setters for all variables
     void setPosition(int seconds);
     int getPosition() const;
@@ -48,6 +50,7 @@ private:
     bool isRandom = false;
     int currentTrackIndex = -1;
     void playTrackAtIndex(int index);
+    std::mt19937 engine{std::random_device{}()};
 };
 
 #endif // PLAYERCONTROLLER_H
