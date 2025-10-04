@@ -44,7 +44,6 @@ void MediaOsd::layoutUi() {
 void MediaOsd::showMessage(const QString& iconText, const QString& message, int ms) {
     m_icon->setText(iconText);
     m_text->setText(message);
-
     QRect r = QApplication::primaryScreen()->availableGeometry();
     resize(320, 120);
     move(r.center().x() - width()/2, r.center().y() - height()/2);
@@ -52,5 +51,3 @@ void MediaOsd::showMessage(const QString& iconText, const QString& message, int 
     raise();
     m_hideTimer.start(ms);
 }
-
-

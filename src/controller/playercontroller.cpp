@@ -62,7 +62,6 @@ void PlayerController::deleteTrack(){
     isPlayed = false;
     int deletedIndex = currentTrackIndex;
     tracks.erase(tracks.begin() + currentTrackIndex);
-    currentTrackIndex = -1;
     emit trackDeleted(deletedIndex);
 }
 

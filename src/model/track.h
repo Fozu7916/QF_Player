@@ -7,8 +7,6 @@
 class Track
 {
 public:
-    Track();
-
     Track(QString path, int length);
 
     QString getPath() const { return path; }

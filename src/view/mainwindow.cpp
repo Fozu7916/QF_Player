@@ -1,9 +1,8 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "../controller/durationcontroller.h"
 #include "../controller/playercontroller.h"
 #include <QFileDialog>
-#include <QtMultimedia/QMediaPlayer>
-#include <QEventLoop>
 #include <QListWidgetItem>
 #include <QFileInfo>
 #include <QTimer>
@@ -12,8 +11,7 @@
 #include <QTextStream>
 #include <QUrl>
 #include <QSettings>
-#include <QtConcurrent>
-#include <QFuture>
+#include <QThread>
 
 const int DEFAULT_VOLUME = 50;
 const QString PLAYLIST_FILENAME = "tracks.txt";
@@ -23,10 +21,15 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , sliderTimer(nullptr)
     , playerController(std::make_unique<PlayerController>())
+    , durationWorkerThread(nullptr)
+    , durationController(nullptr)
 {
     ui->setupUi(this);
     if (statusBar()) statusBar()->hide();
 
+    durationWorkerThread = new QThread(this);
+    durationController = new DurationController();
+    durationController->moveToThread(durationWorkerThread);
 
     QSettings settings("QF_Player", "QF_Player");
     int savedVolume = settings.value("audio/volume", DEFAULT_VOLUME).toInt();
@@ -39,6 +42,11 @@ MainWindow::MainWindow(QWidget *parent)
         ui->volume->setText(QString::number(value));
         playerController->setVolume(value);
     });
+    connect(durationController, &DurationController::durationReady, this, [this](const QString &filePath, int duration) {
+        playerController->addTrack(filePath, duration);
+    });
+    connect(durationController, &DurationController::finished, this, [this]() { durationWorkerThread->quit(); });
+    connect(durationWorkerThread, &QThread::finished, durationController, &QObject::deleteLater);
 
     //nekoarc
     gifMovie = new QMovie(":/images/necoarc.gif");
@@ -58,23 +66,22 @@ MainWindow::MainWindow(QWidget *parent)
     }
     ui->volumeSlider->setValue(savedVolume);
     ui->volume->setText(QString::number(savedVolume));
-
+    durationWorkerThread->start();
 #ifdef _WIN32
     m_osd = new MediaOsd(this);
     registerGlobalMediaHotkeys();
 #endif
-
-
-connect(this, &MainWindow::trackReadyToAdd, [this](const QString &filePath, int dur){
-    playerController->addTrack(filePath, dur);
-});
-
 }
 
 MainWindow::~MainWindow(){
     QSettings settings("QF_Player", "QF_Player");
     settings.setValue("audio/volume", ui->volumeSlider->value());
     settings.setValue("player/lastIndex", playerController->getCurrentIndex());
+
+    if (durationWorkerThread && durationWorkerThread->isRunning()) {
+        durationWorkerThread->quit();
+        durationWorkerThread->wait(3000); // Для безопасности
+    }
 
     delete gifMovie;
     playerController->saveTracks(PLAYLIST_FILENAME);
@@ -85,53 +92,10 @@ void MainWindow::on_playOrStopButton_clicked(){
     playerController->playOrStop();
 }
 
-// void MainWindow::on_addButton_clicked(){
-//     QStringList filePaths = QFileDialog::getOpenFileNames(this, "Выберите треки", "", "Аудио файлы (*.mp3 *.wav *.flac)");
-//     for (const QString &filePath : filePaths) {
-//         if (filePath.isEmpty()) continue;
-//         QtConcurrent::run([this, filePath]() {
-//             int dur = getDuration(filePath);
-//             QMetaObject::invokeMethod(this, [this, filePath, dur]() {
-//                 playerController->addTrack(filePath, dur);
-//             }, Qt::QueuedConnection);
-//         });
-//     }
-// }
-
-// int MainWindow::getDuration(QString filePath){
-//         QMediaPlayer mediaPlayer;
-//         mediaPlayer.setSource(QUrl::fromLocalFile(filePath));
-//         QEventLoop loop;
-//         QObject::connect(&mediaPlayer, &QMediaPlayer::durationChanged, &loop, &QEventLoop::quit);
-//         mediaPlayer.play();
-//         loop.exec();
-//         qint64 durationMs = mediaPlayer.duration();
-//         mediaPlayer.stop();
-//         int durationSec = static_cast<int>(durationMs / 1000);
-//         return durationSec;
-// }
-
 void MainWindow::on_addButton_clicked(){
     QStringList filePaths = QFileDialog::getOpenFileNames(this, "Выберите треки", "", "Аудио файлы (*.mp3 *.wav *.flac)");
-    for (const QString &filePath : filePaths) {
-        if (filePath.isEmpty()) continue;
-        QtConcurrent::run([this, filePath]() {
-            int dur = getDuration(filePath); // блокируем только поток QtConcurrent
-            emit trackReadyToAdd(filePath, dur); // возвращаем в основной поток
-        });
-    }
-}
-
-int MainWindow::getDuration(QString filePath){
-    QMediaPlayer mediaPlayer;
-    QEventLoop loop;
-    QObject::connect(&mediaPlayer, &QMediaPlayer::durationChanged, &loop, &QEventLoop::quit);
-    mediaPlayer.setSource(QUrl::fromLocalFile(filePath));
-    mediaPlayer.play();
-    loop.exec();
-    int durationSec = static_cast<int>(mediaPlayer.duration() / 1000);
-    mediaPlayer.stop();
-    return durationSec;
+    if (filePaths.isEmpty()) return;
+    QMetaObject::invokeMethod(durationController, "processFiles", Qt::QueuedConnection, Q_ARG(QStringList, filePaths));
 }
 
 void MainWindow::on_deleteButton_clicked(){
@@ -191,16 +155,20 @@ void MainWindow::addTrackToList(const QString& name) {
     ui->trackList->addItem(name);
 }
 
-
 void MainWindow::deleteTrackFromList(int index) {
     if( index < 0 or index >= ui->trackList->count()) return;
     ui->trackList->takeItem(index);
+    if(index > 0){
+        playerController->setCurrentIndex(index-1);
+    }
+    else {
+        playerController->setCurrentIndex(-1);
+    }
 }
     
 void MainWindow::setCurrentRow(int index) {
-    if (index >= 0 && index < ui->trackList->count()) {
-        ui->trackList->setCurrentRow(index);
-    }
+    if ( index < 0 or index < ui->trackList->count()) return;
+    ui->trackList->setCurrentRow(index);
 }
 
 void MainWindow::onPlayOrStopUI(bool isPlaying) {

@@ -12,6 +12,8 @@
 #include <QTimer>
 #include <QMovie>
 
+class DurationController; // Forward declaration для избежания циклических зависимостей
+
 namespace Ui {
 class MainWindow;
 }
@@ -40,7 +42,6 @@ protected:
 #endif
     
 private slots:
-    int getDuration(QString filePath);
     void on_playOrStopButton_clicked();
     void on_addButton_clicked();
     void on_TrackLists_itemClicked(QListWidgetItem *item);
@@ -58,6 +59,8 @@ private:
     std::unique_ptr<PlayerController> playerController;
     void updateSliderAndTimerForIndex(int index);
     QMovie* gifMovie;
+    QThread* durationWorkerThread;
+    DurationController* durationController;
 #ifdef _WIN32
     MediaOsd* m_osd;
     void registerGlobalMediaHotkeys();

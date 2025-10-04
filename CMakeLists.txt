@@ -58,12 +58,12 @@ set(PROJECT_SOURCES
     src/view/mainwindow.cpp
     src/view/mainwindow.h
     src/view/mainwindow.ui
+    src/controller/durationcontroller.h
+    src/controller/durationcontroller.cpp
     src/integration/mediaosd.h
     src/integration/mediaosd.cpp
     src/controller/playercontroller.h
     src/controller/playercontroller.cpp
-    src/integration/mpris_service.h
-    src/integration/mpris_service.cpp
     resources/resources.qrc
 )
 

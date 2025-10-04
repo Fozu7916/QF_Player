@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MEDIAOSD_H
+#define MEDIAOSD_H
 
 #include <QWidget>
 #include <QLabel>
@@ -9,7 +10,6 @@ class MediaOsd : public QWidget {
 public:
     explicit MediaOsd(QWidget* parent = nullptr);
     void showMessage(const QString& iconText, const QString& message, int ms = 1200);
-
 private:
     QLabel* m_icon;
     QLabel* m_text;
@@ -17,4 +17,4 @@ private:
     void layoutUi();
 };
 
-
+#endif // MEDIAOSD_H
