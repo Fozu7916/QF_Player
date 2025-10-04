@@ -71,11 +71,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_osd = new MediaOsd(this);
     registerGlobalMediaHotkeys();
 #endif
-
-#ifdef __linux__
-    m_osd = new MediaOsd(this);
-    setupLinuxMediaKeys();
-#endif
 }
 
 MainWindow::~MainWindow(){
@@ -87,10 +82,6 @@ MainWindow::~MainWindow(){
         durationWorkerThread->quit();
         durationWorkerThread->wait(3000); // Для безопасности
     }
-
-#ifdef __linux__
-    cleanupLinuxMediaKeys();
-#endif
 
     delete gifMovie;
     playerController->saveTracks(PLAYLIST_FILENAME);
@@ -296,50 +287,3 @@ void MainWindow::unregisterGlobalMediaHotkeys() {
     UnregisterHotKey(hwnd, HOTKEY_ID_STOP);
 }
 #endif
-
-#ifdef __linux__
-void MainWindow::setupLinuxMediaKeys() {
-    m_linuxMediaKeys = new LinuxMediaKeys(this);
-    
-    // Подключаем унифицированный сигнал медиа-клавиш
-    connect(m_linuxMediaKeys, &LinuxMediaKeys::mediaKeyPressed, this, [this](LinuxMediaKeys::MediaKey key) {
-        switch (key) {
-            case LinuxMediaKeys::PlayPause:
-                playerController->playOrStop();
-                if (m_osd) m_osd->showMessage("⏯", "Play/Pause", 1000);
-                break;
-            case LinuxMediaKeys::Next:
-                playerController->playNext();
-                updateSliderAndTimerForIndex(playerController->getCurrentIndex());
-                if (m_osd) m_osd->showMessage("⏭", "Next", 1000);
-                break;
-            case LinuxMediaKeys::Previous:
-                playerController->playPrev();
-                updateSliderAndTimerForIndex(playerController->getCurrentIndex());
-                if (m_osd) m_osd->showMessage("⏮", "Previous", 1000);
-                break;
-            case LinuxMediaKeys::Stop:
-                if (playerController->getPlayed()) {
-                    playerController->playOrStop();
-                    if (m_osd) m_osd->showMessage("⏹", "Stop", 1000);
-                }
-                break;
-        }
-    });
-    
-    // Инициализируем Linux медиа-клавиши
-    if (!m_linuxMediaKeys->initialize()) {
-        qWarning() << "MainWindow: Не удалось инициализировать Linux медиа-клавиши";
-    } else {
-        qDebug() << "MainWindow: Linux медиа-клавиши инициализированы успешно, статус:" << m_linuxMediaKeys->getStatus();
-    }
-}
-
-void MainWindow::cleanupLinuxMediaKeys() {
-    if (m_linuxMediaKeys) {
-        m_linuxMediaKeys->cleanup();
-        m_linuxMediaKeys = nullptr;
-    }
-}
-#endif
-

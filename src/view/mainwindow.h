@@ -5,9 +5,7 @@
 #ifdef _WIN32
 #include "../integration/mediaosd.h"
 #endif
-#ifdef __linux__
-#include "../integration/linuxmediakeys.h"
-#endif
+
 #include "../player/player.h"
 #include "../model/track.h"
 #include "../controller/playercontroller.h"
@@ -69,13 +67,6 @@ private:
     void registerGlobalMediaHotkeys();
     void unregisterGlobalMediaHotkeys();
     enum { HOTKEY_ID_PLAYPAUSE = 0xA100, HOTKEY_ID_NEXT = 0xA101, HOTKEY_ID_PREV = 0xA102, HOTKEY_ID_STOP = 0xA103 };
-#endif
-
-#ifdef __linux__
-    MediaOsd* m_osd;
-    LinuxMediaKeys* m_linuxMediaKeys;
-    void setupLinuxMediaKeys();
-    void cleanupLinuxMediaKeys();
 #endif
 };
 
