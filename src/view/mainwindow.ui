@@ -107,6 +107,12 @@
       </item>
       <item>
        <widget class="QSlider" name="horizontalSlider">
+        <property name="pageStep">
+         <number>10</number>
+        </property>
+        <property name="tracking">
+         <bool>false</bool>
+        </property>
         <property name="orientation">
          <enum>Qt::Orientation::Horizontal</enum>
         </property>

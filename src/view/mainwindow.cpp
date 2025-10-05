@@ -53,16 +53,14 @@ MainWindow::MainWindow(QWidget *parent)
     ui->nekoArcLabel->setMovie(gifMovie);
     gifMovie->start();
     //nekoarc
-
+    
     ui->volumeSlider->setRange(0, 100);
     playerController->loadTracks(PLAYLIST_FILENAME);
     int lastIndex = settings.value("player/lastIndex", -1).toInt();
     if (lastIndex >= 0 && lastIndex < static_cast<int>(playerController->getTracks().size())) {
-        playerController->setCurrentIndex(lastIndex);
-        ui->horizontalSlider->setMaximum(playerController->getTracks()[lastIndex].getLength());
-        ui->horizontalSlider->setValue(0);
-        ui->time->setText("0:00");
-        ui->trackList->setCurrentRow(lastIndex);
+        playerController->onItemClicked(lastIndex);
+        updateSliderAndTimerForIndex(lastIndex);
+        playerController->playOrStop();
     }
     ui->volumeSlider->setValue(savedVolume);
     ui->volume->setText(QString::number(savedVolume));
@@ -100,6 +98,8 @@ void MainWindow::on_addButton_clicked(){
 
 void MainWindow::on_deleteButton_clicked(){
     playerController->deleteTrack();
+    updateSliderAndTimerForIndex(playerController->getCurrentIndex());
+
 }
 
 void MainWindow::on_nextButton_clicked(){
@@ -113,13 +113,13 @@ void MainWindow::on_prevButton_clicked(){
 }
 
 void MainWindow::on_TrackLists_itemClicked(QListWidgetItem *item){
-        int index = ui->trackList->row(item);
-        playerController->onItemClicked(index);
-        updateSliderAndTimerForIndex(index);
+    int index = ui->trackList->row(item);
+    playerController->onItemClicked(index);
+    updateSliderAndTimerForIndex(index);
 }
 
 void MainWindow::updateSliderAndTimerForIndex(int index) {
-    if (index < 0 || index >= static_cast<int>(playerController->getTracks().size())) return;
+    if (index < 0 || index >= static_cast<int>(playerController->getTracks().size())) { qInfo() << "on_horizontalSlider_sliderMoved: early return, playerController or player null"; return; }
     onPlayOrStopUI(true);
     ui->horizontalSlider->setMaximum(playerController->getTracks()[index].getLength());
     ui->horizontalSlider->setValue(0);
@@ -156,7 +156,7 @@ void MainWindow::addTrackToList(const QString& name) {
 }
 
 void MainWindow::deleteTrackFromList(int index) {
-    if(index < 0 or index >= ui->trackList->count()) return;
+    if(index < 0 or index >= ui->trackList->count()) { qInfo() << "deleteTrackFromList: early return, invalid index" << index; return; }
     ui->trackList->takeItem(index);
     if(index > 0){
         playerController->setCurrentIndex(index-1);
@@ -167,7 +167,7 @@ void MainWindow::deleteTrackFromList(int index) {
 }
     
 void MainWindow::setCurrentRow(int index) {
-    if (index < 0) return;
+    if (index < 0) { qInfo() << "setCurrentRow: early return, invalid index" << index; return; }
     ui->trackList->setCurrentRow(index);
 }
 
