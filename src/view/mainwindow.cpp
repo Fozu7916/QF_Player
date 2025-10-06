@@ -47,6 +47,26 @@ MainWindow::MainWindow(QWidget *parent)
     });
     connect(durationController, &DurationController::finished, this, [this]() { durationWorkerThread->quit(); });
     connect(durationWorkerThread, &QThread::finished, durationController, &QObject::deleteLater);
+    
+    sliderTimer = new QTimer(this);
+    connect(sliderTimer, &QTimer::timeout, this, [this]() {
+        if (playerController->getCurrentIndex() >= 0 && playerController->getCurrentIndex() < playerController->getTracks().size()) {
+            int pos = playerController->getPlayer()->getPosition();
+            if (playerController->getPlayer()->isEof() || (ui->horizontalSlider->maximum() > 0 && pos >= ui->horizontalSlider->maximum() - 1)) {
+                playerController->playNext();
+                updateSliderAndTimerForIndex(playerController->getCurrentIndex());
+                return;
+            }
+            ui->horizontalSlider->setValue(pos);
+            int min = pos / 60;
+            int sec = pos % 60;
+            ui->time->setText(QString::asprintf("%d:%02d", min, sec));
+        }
+    });
+    if (!sliderTimer->isActive()) sliderTimer->start(500);
+
+
+
 
     //nekoarc
     gifMovie = new QMovie(":/images/necoarc.gif");
