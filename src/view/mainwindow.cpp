@@ -99,6 +99,7 @@ void MainWindow::on_addButton_clicked(){
 void MainWindow::on_deleteButton_clicked(){
     playerController->deleteTrack();
     updateSliderAndTimerForIndex(playerController->getCurrentIndex());
+    onPlayOrStopUI(false);
 }
 
 void MainWindow::on_nextButton_clicked(){
@@ -123,24 +124,6 @@ void MainWindow::updateSliderAndTimerForIndex(int index) {
     ui->horizontalSlider->setMaximum(playerController->getTracks()[index].getLength());
     ui->horizontalSlider->setValue(0);
     ui->time->setText("0:00");
-    if (!sliderTimer) {
-        sliderTimer = new QTimer(this);
-        connect(sliderTimer, &QTimer::timeout, this, [this]() {
-            if (playerController->getCurrentIndex() >= 0 && playerController->getCurrentIndex() < playerController->getTracks().size()) {
-                int pos = playerController->getPlayer()->getPosition();
-                if (playerController->getPlayer()->isEof() || (ui->horizontalSlider->maximum() > 0 && pos >= ui->horizontalSlider->maximum() - 1)) {
-                    playerController->playNext();
-                    updateSliderAndTimerForIndex(playerController->getCurrentIndex());
-                    return;
-                }
-                ui->horizontalSlider->setValue(pos);
-                int min = pos / 60;
-                int sec = pos % 60;
-                ui->time->setText(QString::asprintf("%d:%02d", min, sec));
-            }
-        });
-    }
-    if (!sliderTimer->isActive()) sliderTimer->start(500);
 }
 
 void MainWindow::on_horizontalSlider_sliderMoved(int position){
