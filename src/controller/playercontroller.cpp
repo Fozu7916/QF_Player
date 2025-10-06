@@ -68,9 +68,8 @@ void PlayerController::saveTracks(QString filename) {
 void PlayerController::deleteTrack(){
     if (!canPlayTrack(currentTrackIndex)) return;
     qInfo() << "PlayerController: Delete track at index" << currentTrackIndex;
-    int deletedIndex = currentTrackIndex;
     tracks.erase(tracks.begin() + currentTrackIndex);
-    emit trackDeleted(deletedIndex);
+    emit trackDeleted(currentTrackIndex);
     playTrackAtIndex(currentTrackIndex);
     playerPause(player.get(), isPlayed);
 }

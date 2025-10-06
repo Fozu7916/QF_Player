@@ -99,7 +99,6 @@ void MainWindow::on_addButton_clicked(){
 void MainWindow::on_deleteButton_clicked(){
     playerController->deleteTrack();
     updateSliderAndTimerForIndex(playerController->getCurrentIndex());
-
 }
 
 void MainWindow::on_nextButton_clicked(){
