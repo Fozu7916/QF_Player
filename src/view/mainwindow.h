@@ -55,7 +55,6 @@ signals:
     void trackReadyToAdd(const QString &filePath, int durationSec);
 private:
     Ui::MainWindow *ui;
-    std::vector<Track> trackList;
     QTimer *sliderTimer;
     std::unique_ptr<PlayerController> playerController;
     void updateSliderAndTimerForIndex(int index);
