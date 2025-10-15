@@ -3,5 +3,7 @@
   <qresource prefix="/">
     <file>images/fone.jpg</file>
     <file>images/necoarc.gif</file>
+    <file>images/images.jfif</file>
+    <file>images/images.ico</file>
   </qresource>
 </RCC>

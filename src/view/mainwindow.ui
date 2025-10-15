@@ -19,6 +19,10 @@
   <property name="windowTitle">
    <string>Плеер музыки прям вообще бомба</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../../resources/resources.qrc">
+    <normaloff>:/images/images.jfif</normaloff>:/images/images.jfif</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true"/>
   </property>
@@ -296,6 +300,8 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../resources/resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

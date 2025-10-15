@@ -23,6 +23,9 @@ set(MPV_INCLUDE_DIR "${MPV_DIR}/include")
 set(MPV_LIB_DIR "${MPV_DIR}/lib")
 
 if(WIN32)
+    set(APP_RC_FILE ${CMAKE_CURRENT_SOURCE_DIR}/app_icon.rc)
+    set(WIN_RC_SOURCES ${APP_RC_FILE})
+
     # Проверка файлов Windows
     if(NOT EXISTS "${MPV_DIR}/libmpv-2.dll")
         message(FATAL_ERROR "libmpv-2.dll not found in ${MPV_DIR}")
@@ -62,7 +65,7 @@ set(PROJECT_SOURCES
     src/controller/durationcontroller.cpp
     src/integration/mediaosd.h
     src/integration/mediaosd.cpp
-
+    ${WIN_RC_SOURCES}
 
     src/controller/playercontroller.h
     src/controller/playercontroller.cpp
@@ -130,3 +133,41 @@ if(QT_VERSION_MAJOR EQUAL 6)
 endif()
 
 add_subdirectory(tests)
+
+add_custom_command(TARGET QF_Player POST_BUILD
+COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${CMAKE_SOURCE_DIR}/resources/images/images.ico" 
+    "$<TARGET_FILE_DIR:QF_Player>/images/images.ico"
+)
+
+
+add_custom_command(TARGET QF_Player POST_BUILD
+COMMAND ${CMAKE_COMMAND} -E copy
+    "${MPV_DIR}/libmpv-2.dll"
+    "$<TARGET_FILE_DIR:QF_Player>"
+COMMENT "Copying libmpv-2.dll to output directory"
+)
+
+if(WIN32)
+    # 3. Копирование DLL и плагинов Qt с помощью windeployqt
+find_program(WINDEPLOYQT_EXECUTABLE NAMES windeployqt PATHS 
+"${QT_DIR}" "${QT_DIR}/bin" "${QT_HOST_PATH}/bin" # Добавляем пути для поиска
+NO_DEFAULT_PATH
+)
+# Если QT_DIR не определен, попытаемся найти windeployqt через Qt Tools (если используется MinGW/Visual Studio)
+if(NOT WINDEPLOYQT_EXECUTABLE)
+find_program(WINDEPLOYQT_EXECUTABLE windeployqt)
+endif()
+
+if(WINDEPLOYQT_EXECUTABLE)
+add_custom_command(TARGET QF_Player POST_BUILD
+    COMMAND ${WINDEPLOYQT_EXECUTABLE} 
+    --qmldir ${CMAKE_SOURCE_DIR} # Если есть QML, но здесь безопасно
+    --dir "$<TARGET_FILE_DIR:QF_Player>" # Папка назначения (где лежит .exe)
+    "$<TARGET_FILE:QF_Player>"            # Исполняемый файл для анализа
+    COMMENT "Running windeployqt to copy required Qt DLLs and plugins"
+)
+else()
+message(WARNING "windeployqt not found. Deployment will be incomplete.")
+endif()
+endif()
