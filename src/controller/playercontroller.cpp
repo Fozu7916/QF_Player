@@ -98,20 +98,22 @@ void PlayerController::playNext(){
 
 void PlayerController::playPrev(){
     if (!canPlayTrack(currentTrackIndex)) return;
-    if (currentTrackIndex < 1){
-        qInfo() << "PlayerController:Loop to last track";
-        currentTrackIndex = tracks.size() - 1;
-    } else{
-        qInfo() << "PlayerController: Play prev from" << currentTrackIndex;
-        player->pause();
+    auto timePtr = std::make_unique<int>(0);
+    emit KnowTime(timePtr.get());
+    if(*timePtr > 1){
+        playTrackAtIndex(currentTrackIndex);
+        return;
+    } else {
         currentTrackIndex--;
+        playTrackAtIndex(currentTrackIndex);
+        return;
     }
-    playTrackAtIndex(currentTrackIndex);
 }
 
 void PlayerController::playTrackAtIndex(int index) {
     if (!canPlayTrack(index)) return;
     qInfo() << "PlayerController: Play index" << index << QFileInfo(tracks[index].getPath()).fileName();
+    currentTrackIndex = index;
     emit setCurrentRow(index);
     player->loadFile(tracks[index].getPath());
     playerPlay(player.get(), isPlayed);
@@ -133,10 +135,7 @@ void PlayerController::playOrStop(){
 void PlayerController::onItemClicked(int index){
         if (!canPlayTrack(index)) return;
         qInfo() << "PlayerController: Click index" << index;
-        currentTrackIndex = index;
-        player->loadFile(tracks[index].getPath());
-        playerPlay(player.get(), isPlayed);
-        emit setCurrentRow(currentTrackIndex);
+        playTrackAtIndex(index);
 }
 
 // Getters and setters

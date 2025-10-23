@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(playerController.get(), &PlayerController::trackLoaded, this, &MainWindow::addTrackToList);
     connect(playerController.get(), &PlayerController::setCurrentRow, this, &MainWindow::setCurrentRow);
     connect(playerController.get(), &PlayerController::playOrStopUI, this, &MainWindow::onPlayOrStopUI);
+    connect(playerController.get(), &PlayerController::KnowTime,this, &MainWindow::GetTime);
     connect(ui->volumeSlider, &QSlider::valueChanged, this, [this](int value){
         ui->volume->setText(QString::number(value));
         playerController->setVolume(value);
@@ -104,6 +105,10 @@ MainWindow::~MainWindow(){
     delete gifMovie;
     playerController->saveTracks(PLAYLIST_FILENAME);
     delete ui;
+}
+
+void MainWindow::GetTime(int* time){
+    *time = ui->horizontalSlider->value();
 }
 
 void MainWindow::on_playOrStopButton_clicked(){

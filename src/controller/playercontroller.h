@@ -43,6 +43,7 @@ signals:
     void trackDeleted(int index);
     void setCurrentRow(int index);
     void playOrStopUI(bool isPlaying);
+    void KnowTime(int* time);
 private:
     std::vector<Track> tracks;
     std::unique_ptr<Player> player;
