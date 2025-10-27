@@ -181,8 +181,10 @@ void MainWindow::setCurrentRow(int index) {
 void MainWindow::onPlayOrStopUI(bool isPlaying) {
     if (isPlaying) {
         ui->playOrStopButton->setText("⏸");
+        gifMovie->start();
     } else {
         ui->playOrStopButton->setText("▶");
+        gifMovie->stop();
     }
 }
 
