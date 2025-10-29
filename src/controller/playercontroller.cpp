@@ -29,7 +29,6 @@ bool PlayerController::canPlayTrack(int index) {
 }
 
 void PlayerController::loadTracks(QString filename) {
-    qInfo() << "Loading tracks from" << filename;
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {qWarning()<< "PlayerController: Не удалось прочитать список треков"; return;}
     QTextStream in(&file);
@@ -46,14 +45,17 @@ void PlayerController::loadTracks(QString filename) {
             }
         }
         file.close();
+
+        qInfo() << "Loading tracks from" << filename;
         qInfo() << "PlayerController: Tracks loaded:" << tracks.size();
 }
 
 void PlayerController::addTrack(const QString& filePath, int durationSec) {
-    qInfo() << "PlayerController: Add track" << filePath << "len" << durationSec;
     Track new_track(filePath, durationSec);
     tracks.push_back(new_track);
     emit trackLoaded(QFileInfo(filePath).fileName());
+
+    qInfo() << "PlayerController: Add track" << filePath << "len" << durationSec;
 }
 
 void PlayerController::saveTracks(QString filename) {
@@ -67,33 +69,35 @@ void PlayerController::saveTracks(QString filename) {
 
 void PlayerController::deleteTrack(){
     if (!canPlayTrack(currentTrackIndex)) return;
-    qInfo() << "PlayerController: Delete track at index" << currentTrackIndex;
     tracks.erase(tracks.begin() + currentTrackIndex);
     emit trackDeleted(currentTrackIndex);
     playTrackAtIndex(currentTrackIndex);
     playerPause(player.get(), isPlayed);
+    
+    qInfo() << "PlayerController: Delete track at index" << currentTrackIndex;
 }
 
 void PlayerController::playNext(){
     if (!canPlayTrack(currentTrackIndex)) return;
     playerPause(player.get(), isPlayed);
+    queue.push(currentTrackIndex);
     if(isRandom){
-        qInfo() << "PlayerController: Play next from" << currentTrackIndex;
         std::uniform_int_distribution<size_t> dist(0, tracks.size() - 1);
         size_t index = dist(engine);
         currentTrackIndex = static_cast<int>(index);
-        qInfo() << "PlayerController: Play next to" << currentTrackIndex;
     } else{
         if (currentTrackIndex < tracks.size() - 1){
-            qInfo() << "PlayerController: Play next from" << currentTrackIndex;
             currentTrackIndex++;
-            qInfo() << "PlayerController: Play next to" << currentTrackIndex;
         } else {
-            qInfo() << "PlayerController: Loop to first track";
             currentTrackIndex = 0;
+
+            qInfo() << "PlayerController: Loop to first track";
         }
     }
     playTrackAtIndex(currentTrackIndex);
+    
+    qInfo() << "PlayerController: Play next from" << queue.top();
+    qInfo() << "PlayerController: Play next to" << currentTrackIndex;
 }
 
 void PlayerController::playPrev(){
@@ -104,31 +108,44 @@ void PlayerController::playPrev(){
         playTrackAtIndex(currentTrackIndex);
         return;
     } else {
-        currentTrackIndex--;
-        playTrackAtIndex(currentTrackIndex);
-        return;
+        if(queue.size() == 0){
+            currentTrackIndex--;
+            playTrackAtIndex(currentTrackIndex);
+
+            qInfo() << "PlayerController: current stack index = " << queue.top();
+            return;
+        } else {
+            qInfo() << "  " << queue.top() << "\n";
+            currentTrackIndex = queue.top();
+            queue.pop();
+            playTrackAtIndex(currentTrackIndex);
+            return;
+        }
     }
 }
 
 void PlayerController::playTrackAtIndex(int index) {
     if (!canPlayTrack(index)) return;
-    qInfo() << "PlayerController: Play index" << index << QFileInfo(tracks[index].getPath()).fileName();
     currentTrackIndex = index;
     emit setCurrentRow(index);
     player->loadFile(tracks[index].getPath());
     playerPlay(player.get(), isPlayed);
+    
+    qInfo() << "PlayerController: Play index" << index << QFileInfo(tracks[index].getPath()).fileName();
 }
 
 void PlayerController::playOrStop(){
     if (!canPlayTrack(currentTrackIndex)) return;
     if (isPlayed) {
-        qInfo() << "PlayerController: Pause" << currentTrackIndex;
         playerPause(player.get(), isPlayed);
         emit playOrStopUI(false);
+        
+        qInfo() << "PlayerController: Pause" << currentTrackIndex;
     } else {
-        qInfo() << "PlayerController: Play" << currentTrackIndex;
         playerPlay(player.get(), isPlayed);
         emit playOrStopUI(true);
+        
+        qInfo() << "PlayerController: Play" << currentTrackIndex;
     }
 }
 

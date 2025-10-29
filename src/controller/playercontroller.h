@@ -7,6 +7,7 @@
 #include <memory>
 #include <QObject>
 #include <random>
+#include <stack>
 
 class PlayerController : public QObject
 {
@@ -49,6 +50,7 @@ private:
     std::unique_ptr<Player> player;
     bool isPlayed = false;
     bool isRandom = false;
+    std::stack<int> queue = {};
     int currentTrackIndex = -1;
     void playTrackAtIndex(int index);
     std::mt19937 engine{std::random_device{}()};
