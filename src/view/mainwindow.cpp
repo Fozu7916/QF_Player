@@ -38,7 +38,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(playerController.get(), &PlayerController::trackLoaded, this, &MainWindow::addTrackToList);
     connect(playerController.get(), &PlayerController::setCurrentRow, this, &MainWindow::setCurrentRow);
     connect(playerController.get(), &PlayerController::playOrStopUI, this, &MainWindow::onPlayOrStopUI);
-    connect(playerController.get(), &PlayerController::KnowTime,this, &MainWindow::GetTime);
     connect(ui->volumeSlider, &QSlider::valueChanged, this, [this](int value){
         ui->volume->setText(QString::number(value));
         playerController->setVolume(value);
@@ -108,9 +107,6 @@ MainWindow::~MainWindow(){
     delete ui;
 }
 
-void MainWindow::GetTime(int* time){
-    *time = ui->horizontalSlider->value();
-}
 
 void MainWindow::on_playOrStopButton_clicked(){
     playerController->playOrStop();
@@ -166,12 +162,7 @@ void MainWindow::addTrackToList(const QString& name) {
 void MainWindow::deleteTrackFromList(int index) {
     if(index < 0 or index >= ui->trackList->count()) { qInfo() << "MainWindow: early return, invalid index" << index; return; }
     ui->trackList->takeItem(index);
-    if(index > 0){
-        playerController->setCurrentIndex(index-1);
-    }
-    else {
-        playerController->setCurrentIndex(-1);
-    }
+
 }
     
 void MainWindow::setCurrentRow(int index) {

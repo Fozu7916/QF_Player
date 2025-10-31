@@ -32,7 +32,6 @@ public slots:
     void deleteTrackFromList(int index);
     void setCurrentRow(int index);
     void onPlayOrStopUI(bool isPlaying);
-    void GetTime(int* time);
     
 #ifdef _WIN32
 protected:

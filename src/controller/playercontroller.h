@@ -24,6 +24,9 @@ public:
     void playOrStop();
     void setVolume(int value);
     bool canPlayTrack(int index);
+    bool isNotValidTrackIndex(int index) const; 
+    void playerPause(); 
+    void playerPlay();
     // Getters and setters for all variables
     void setPosition(int seconds);
     int getPosition() const;
@@ -44,13 +47,12 @@ signals:
     void trackDeleted(int index);
     void setCurrentRow(int index);
     void playOrStopUI(bool isPlaying);
-    void KnowTime(int* time);
 private:
     std::vector<Track> tracks;
     std::unique_ptr<Player> player;
     bool isPlayed = false;
     bool isRandom = false;
-    std::stack<int> queue = {};
+    std::stack<int> history = {};
     int currentTrackIndex = -1;
     void playTrackAtIndex(int index);
     std::mt19937 engine{std::random_device{}()};

@@ -6,25 +6,32 @@
 #include <random>
 #include <ctime>
 
+
 PlayerController::PlayerController() : player(std::make_unique<Player>()) {}
 
-static bool isNotValidTrackIndex(int index, const std::vector<Track>& tracks) {
-    return index < 0 || index >= static_cast<int>(tracks.size());
-}
+bool PlayerController::isNotValidTrackIndex(int index) const {
+        return index < 0 || index >= static_cast<int>(tracks.size());
+    }
 
-static void playerPause(Player* player, bool& isPlayed1){
+void PlayerController::playerPause(){
     player->pause();
-    isPlayed1 = false;
+    isPlayed = false;
 }
 
-static void playerPlay(Player* player, bool& isPlayed1){
+void PlayerController::playerPlay(){
     player->play();
-    isPlayed1 = true;
+    isPlayed = true;
 }
 
 bool PlayerController::canPlayTrack(int index) {
-    if (isNotValidTrackIndex(index, tracks)) { qWarning() << "PlayerController: Invalid index:" << index; setCurrentIndex(-1); return false; }
-    if (!player) { qWarning() << "PlayerController: Player не создан"; return false; }
+    if (isNotValidTrackIndex(index)) { 
+        qWarning() << "PlayerController: Invalid index:" << index; 
+        return false; 
+    }
+    if (!player) { 
+        qWarning() << "PlayerController: Player не создан"; 
+        return false; 
+    }
     return true;
 }
 
@@ -72,16 +79,22 @@ void PlayerController::deleteTrack(){
     if (!canPlayTrack(currentTrackIndex)) return;
     tracks.erase(tracks.begin() + currentTrackIndex);
     emit trackDeleted(currentTrackIndex);
+    if(currentTrackIndex > 0){
+        setCurrentIndex(currentTrackIndex-1);
+    }
+    else {
+        setCurrentIndex(-1);
+    }
     playTrackAtIndex(currentTrackIndex);
-    playerPause(player.get(), isPlayed);
+    playerPause();
     
     qInfo() << "PlayerController: Delete track at index" << currentTrackIndex;
 }
 
 void PlayerController::playNext(){
     if (!canPlayTrack(currentTrackIndex)) return;
-    playerPause(player.get(), isPlayed);
-    queue.push(currentTrackIndex);
+    playerPause();
+    history.push(currentTrackIndex);
     if(isRandom){
         std::uniform_int_distribution<size_t> dist(0, tracks.size() - 1);
         size_t index = dist(engine);
@@ -96,16 +109,18 @@ void PlayerController::playNext(){
     }
     playTrackAtIndex(currentTrackIndex);
     
-    qInfo() << "PlayerController: Play next from" << queue.top();
+    qInfo() << "PlayerController: Play next from" << history.top();
     qInfo() << "PlayerController: Play next to" << currentTrackIndex;
 }
 
 void PlayerController::playPrev(){
     if (!canPlayTrack(currentTrackIndex)) return;
-    auto timePtr = std::make_unique<int>(0);
-    emit KnowTime(timePtr.get());
-    if(*timePtr > 1){ playTrackAtIndex(currentTrackIndex); return;}
-    if(queue.size() == 0){
+    int currentTime = getPosition(); 
+    if(currentTime > 1){ 
+        playTrackAtIndex(currentTrackIndex);
+        return;
+    }
+    if(history.empty()){
         if(currentTrackIndex > 0){
             currentTrackIndex--;
         }
@@ -113,13 +128,12 @@ void PlayerController::playPrev(){
             currentTrackIndex = tracks.size() - 1;
         }
     } else {
-        qInfo() << "PlayerController: current stack index = " << queue.top();
-        currentTrackIndex = queue.top();
-        queue.pop();
+        qInfo() << "PlayerController: Play prev from history stack =" << history.top();
+        currentTrackIndex = history.top();
+        history.pop();
     }
     playTrackAtIndex(currentTrackIndex);
 
-    qInfo() << "PlayerController: Play next from" << queue.top();
     qInfo() << "PlayerController: Play next to" << currentTrackIndex;
 }
 
@@ -128,7 +142,7 @@ void PlayerController::playTrackAtIndex(int index) {
     currentTrackIndex = index;
     emit setCurrentRow(index);
     player->loadFile(tracks[index].getPath());
-    playerPlay(player.get(), isPlayed);
+    playerPlay();
     
     qInfo() << "PlayerController: Play index" << index << QFileInfo(tracks[index].getPath()).fileName();
 }
@@ -136,11 +150,11 @@ void PlayerController::playTrackAtIndex(int index) {
 void PlayerController::playOrStop(){
     if (!canPlayTrack(currentTrackIndex)) return;
     if (isPlayed) {
-        playerPause(player.get(), isPlayed);
+        playerPause();
         emit playOrStopUI(false);
         qInfo() << "PlayerController: Pause" << currentTrackIndex;
     } else {
-        playerPlay(player.get(), isPlayed);
+        playerPlay();
         emit playOrStopUI(true);
         qInfo() << "PlayerController: Play" << currentTrackIndex;
     }
@@ -166,7 +180,7 @@ const Track& PlayerController::getTrack(int index) const {
 }
 
 void PlayerController::removeTrack(int index) {
-    if (isNotValidTrackIndex(index, tracks)) return;
+    if (isNotValidTrackIndex(index)) return;
     tracks.erase(tracks.begin() + index);
 }
 
