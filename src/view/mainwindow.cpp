@@ -52,7 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
     sliderTimer = new QTimer(this);
     connect(sliderTimer, &QTimer::timeout, this, [this]() {
         if (playerController->getCurrentIndex() >= 0 && playerController->getCurrentIndex() < playerController->getTracks().size()) {
-            int pos = playerController->getPlayer()->getPosition();
+            int pos = playerController->getPosition();
             if (playerController->getPlayer()->isEof() || (ui->horizontalSlider->maximum() > 0 && pos >= ui->horizontalSlider->maximum() - 1)) {
                 playerController->playNext();
                 updateSliderAndTimerForIndex(playerController->getCurrentIndex());
@@ -68,13 +68,14 @@ MainWindow::MainWindow(QWidget *parent)
 
 
 
-
     //nekoarc
     gifMovie = new QMovie(":/images/necoarc.gif");
     ui->nekoArcLabel->setMovie(gifMovie);
     gifMovie->start();
     //nekoarc
     
+
+
     ui->volumeSlider->setRange(0, 100);
     playerController->loadTracks(PLAYLIST_FILENAME);
     int lastIndex = settings.value("player/lastIndex", -1).toInt();
@@ -144,7 +145,7 @@ void MainWindow::on_TrackLists_itemClicked(QListWidgetItem *item){
 }
 
 void MainWindow::updateSliderAndTimerForIndex(int index) {
-    if (index < 0 || index >= static_cast<int>(playerController->getTracks().size())) { qInfo() << "on_horizontalSlider_sliderMoved: early return, playerController or player null"; return; }
+    if (index < 0 || index >= static_cast<int>(playerController->getTracks().size())) { qInfo() << "MainWindow: early return, playerController or player null"; return; }
     onPlayOrStopUI(true);
     ui->horizontalSlider->setMaximum(playerController->getTracks()[index].getLength());
     ui->horizontalSlider->setValue(0);
@@ -152,7 +153,7 @@ void MainWindow::updateSliderAndTimerForIndex(int index) {
 }
 
 void MainWindow::on_horizontalSlider_sliderMoved(int position){
-    playerController->getPlayer()->setPosition(position);
+    playerController->setPosition(position);
     int min = position / 60;
     int sec = position % 60;
     ui->time->setText(QString::asprintf("%d:%02d", min, sec));
@@ -163,7 +164,7 @@ void MainWindow::addTrackToList(const QString& name) {
 }
 
 void MainWindow::deleteTrackFromList(int index) {
-    if(index < 0 or index >= ui->trackList->count()) { qInfo() << "deleteTrackFromList: early return, invalid index" << index; return; }
+    if(index < 0 or index >= ui->trackList->count()) { qInfo() << "MainWindow: early return, invalid index" << index; return; }
     ui->trackList->takeItem(index);
     if(index > 0){
         playerController->setCurrentIndex(index-1);
@@ -174,7 +175,7 @@ void MainWindow::deleteTrackFromList(int index) {
 }
     
 void MainWindow::setCurrentRow(int index) {
-    if (index < 0) { qInfo() << "setCurrentRow: early return, invalid index" << index; return; }
+    if (index < 0) { qInfo() << "MainWindow: early return, invalid index" << index; return; }
     ui->trackList->setCurrentRow(index);
 }
 
