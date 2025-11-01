@@ -11,7 +11,7 @@ PlayerController::PlayerController() : player(std::make_unique<Player>()) {}
 
 bool PlayerController::isNotValidTrackIndex(int index) const {
         return index < 0 || index >= static_cast<int>(tracks.size());
-    }
+}
 
 void PlayerController::playerPause(){
     player->pause();
@@ -38,7 +38,8 @@ bool PlayerController::canPlayTrack(int index) {
 
 void PlayerController::loadTracks(QString filename) {
     QFile file(filename);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {qWarning()<< "PlayerController: Не удалось прочитать список треков"; return;}
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) 
+    {qWarning()<< "PlayerController: Не удалось прочитать список треков"; return;}
     QTextStream in(&file);
     tracks.clear();
     while (!in.atEnd()) {
@@ -67,12 +68,13 @@ void PlayerController::addTrack(const QString& filePath, int durationSec) {
 }
 
 void PlayerController::saveTracks(QString filename) {
-    qInfo() << "PlayerController: Saving tracks to" << filename;
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {qWarning()<< "PlayerController: Не удалось сохранить список треков"; return;}
     QTextStream out(&file);
     for (const auto& track : tracks) { out << track.getPath() << ";" << track.getLength() << "\n"; }
     file.close();
+
+    qInfo() << "PlayerController: Saving tracks to" << filename;
 }
 
 void PlayerController::deleteTrack(){
@@ -163,6 +165,7 @@ void PlayerController::playOrStop(){
 void PlayerController::onItemClicked(int index){
         if (!canPlayTrack(index)) return;
         playTrackAtIndex(index);
+        
         qInfo() << "PlayerController: Click index" << index;
 }
 
@@ -196,8 +199,8 @@ int PlayerController::getCurrentIndex() const {
     return currentTrackIndex;
 }
 
-Player* PlayerController::getPlayer() const {
-    return player.get();
+bool PlayerController::isEof() const {
+    return player.get()->isEof();
 }
 
 void PlayerController::setRandom(bool now) {

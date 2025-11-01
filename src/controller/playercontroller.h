@@ -37,7 +37,7 @@ public:
     void clearTracks();
     void setCurrentIndex(int index);
     int getCurrentIndex() const;
-    Player* getPlayer() const;
+    bool isEof() const;
     void setRandom(bool now);
     bool getRandom() const;
     void setPlayed(bool now);

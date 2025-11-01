@@ -6,8 +6,6 @@
 #include "../integration/mediaosd.h"
 #endif
 
-#include "../player/player.h"
-#include "../model/track.h"
 #include "../controller/playercontroller.h"
 #include <QListWidgetItem>
 #include <QTimer>
@@ -70,6 +68,3 @@ private:
 };
 
 #endif // MAINWINDOW_H
-
-
-

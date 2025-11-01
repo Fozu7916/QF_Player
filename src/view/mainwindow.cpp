@@ -12,6 +12,7 @@
 #include <QUrl>
 #include <QSettings>
 #include <QThread>
+#include <vector>
 
 const int DEFAULT_VOLUME = 50;
 const QString PLAYLIST_FILENAME = "tracks.txt";
@@ -52,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(sliderTimer, &QTimer::timeout, this, [this]() {
         if (playerController->getCurrentIndex() >= 0 && playerController->getCurrentIndex() < playerController->getTracks().size()) {
             int pos = playerController->getPosition();
-            if (playerController->getPlayer()->isEof() || (ui->horizontalSlider->maximum() > 0 && pos >= ui->horizontalSlider->maximum() - 1)) {
+            if (playerController->isEof() || (ui->horizontalSlider->maximum() > 0 && pos >= ui->horizontalSlider->maximum() - 1)) {
                 playerController->playNext();
                 updateSliderAndTimerForIndex(playerController->getCurrentIndex());
                 return;
@@ -72,7 +73,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->nekoArcLabel->setMovie(gifMovie);
     gifMovie->start();
     //nekoarc
-    
+
 
 
     ui->volumeSlider->setRange(0, 100);
@@ -102,11 +103,10 @@ MainWindow::~MainWindow(){
         durationWorkerThread->wait(3000); // Для безопасности
     }
 
-    delete gifMovie;
     playerController->saveTracks(PLAYLIST_FILENAME);
+    delete gifMovie;
     delete ui;
 }
-
 
 void MainWindow::on_playOrStopButton_clicked(){
     playerController->playOrStop();
