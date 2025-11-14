@@ -35,7 +35,6 @@ bool PlayerController::canPlayTrack(int index) {
     return true;
 }
 
-
 void PlayerController::loadTracks(QString filename) {
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) 

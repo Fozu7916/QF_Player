@@ -176,7 +176,7 @@ void MainWindow::onPlayOrStopUI(bool isPlaying) {
         gifMovie->start();
     } else {
         ui->playOrStopButton->setText("▶");
-        gifMovie->stop();
+        gifMovie->setPaused(true);
     }
 }
 
