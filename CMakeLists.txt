@@ -33,11 +33,15 @@ if(WIN32)
     if(NOT EXISTS "${MPV_DIR}/libmpv.dll.a")
         message(FATAL_ERROR "libmpv.dll.a not found in ${MPV_DIR}")
     endif()
+    if(NOT EXISTS "${MPV_INCLUDE_DIR}/mpv/client.h")
+        message(FATAL_ERROR "mpv headers not found (${MPV_INCLUDE_DIR}/mpv/client.h). On Windows run scripts/fetch_mpv_win.ps1")
+    endif()
 
     add_library(mpv SHARED IMPORTED)
     set_target_properties(mpv PROPERTIES
         IMPORTED_IMPLIB "${MPV_DIR}/libmpv.dll.a"
         IMPORTED_LOCATION "${MPV_DIR}/libmpv-2.dll"
+        INTERFACE_INCLUDE_DIRECTORIES "${MPV_INCLUDE_DIR}"
     )
 else()
     # Linux / Unix
