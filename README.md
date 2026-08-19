@@ -1,138 +1,137 @@
-# QF_Player — Музыкальный плеер на Qt
+# QF_Player — Music Player in Qt
 
 ![Qt](https://img.shields.io/badge/Qt-6.x-green)
 ![C++](https://img.shields.io/badge/C%2B%2B-17-blue)
 ![Windows](https://img.shields.io/badge/Windows-10%2B-blue)
 ![Linux](https://img.shields.io/badge/Linux-supported-green)
 
-## Описание
+## Description
 
-QF_Player — это современный музыкальный плеер на Qt с поддержкой mpv. Приложение предоставляет:
+QF_Player is a modern music player in Qt with mpv support. The app offers:
 
-### 🎵 Основные функции
-- **Воспроизведение аудио**: поддержка MP3, WAV, FLAC и других форматов
-- **Управление плейлистом**: добавление, удаление, переключение треков
-- **Режим воспроизведения**: обычный и случайный порядок
-- **Управление громкостью**: плавная регулировка от 0 до 100%
-- **Сохранение состояния**: автоматическое сохранение плейлиста и настроек
+### 🎵 Main Features
+- **Audio Playback**: Supports MP3, WAV, FLAC, and other formats
+- **Playlist Management**: Add, Remove, and Switch Tracks
+- **Playback Mode**: Normal and Shuffle
+- **Volume Control**: Smoothly adjust from 0 to 100%
+- **State Saving**: Automatically saves playlists and settings
 
-### ⌨️ Системная интеграция
-- **Медиа-клавиши Windows**: поддержка кнопок на клавиатуре и гарнитуре
-- **Глобальные горячие клавиши**: работают даже когда окно не в фокусе
-- **OSD уведомления**: визуальная обратная связь при нажатии медиа-клавиш
-- **Автозагрузка**: восстановление последнего плейлиста при запуске
+### ⌨️ System Integration
+- **Windows Media Keys**: Supports keyboard and headset buttons
+- **Global Hotkeys**: Work even when the window is out of focus
+- **OSD Notifications**: Visual feedback when pressing media keys
+- **Autoload**: Restores the last playlist on startup
 
-## Скриншот
+## Screenshot
 <img width="659" height="832" alt="image" src="https://github.com/user-attachments/assets/7fa7e5b9-0736-42c8-8894-665916434e30" />
 
+## 🚀 Quick Start
 
-## 🚀 Быстрый старт
-
-### Требования
-- **Windows 10+** или **Linux** (Ubuntu 20.04+, Arch Linux)
-- **Qt 6.x** с модулями: Widgets, Multimedia, Concurrent
+### Requirements
+- **Windows 10+** or **Linux** (Ubuntu 20.04+, Arch Linux)
+- **Qt 6.x** with modules: Widgets, Multimedia, Concurrent
 - **CMake 3.16+**
-- **mpv** (автоматическая установка через скрипты)
+- **mpv** (automatic installation via scripts)
 
-### Сборка
+### Build
 
-1. **Клонируйте репозиторий:**
-   ```bash
-   git clone https://github.com/yourname/TextRedactor.git
-   cd TextRedactor
-   ```
+1. **Clone the repository:**
+```bash
+git clone https://github.com/yourname/TextRedactor.git
+cd TextRedactor
+```
 
-2. **Установите mpv зависимости:**
-   
-   **Windows (PowerShell):**
-   ```powershell
-   .\scripts\fetch_mpv_win.ps1
-   ```
-   
-   **Linux (Ubuntu/Debian):**
-   ```bash
-   chmod +x scripts/fetch_mpv_linux.sh
-   ./scripts/fetch_mpv_linux.sh
-   ```
-   
-   **Linux (Arch/Manjaro):**
-   ```bash
-   chmod +x scripts/fetch_mpv_arch.sh
-   ./scripts/fetch_mpv_arch.sh
-   ```
+2. **Install mpv dependencies:**
 
-3. **Соберите проект:**
-   ```bash
-   mkdir build && cd build
-   cmake .. -G "Ninja Multi-Config" -DCMAKE_BUILD_TYPE=Release
-   cmake --build . --config Release
-   ```
+**Windows (PowerShell):** 
+```powershell 
+.\scripts\fetch_mpv_win.ps1 
+``` 
 
-4. **Запустите:**
-   ```bash
-   # Windows
-   ./TextRedactor.exe
-   
-   # Linux
-   ./TextRedactor
-   ```
+**Linux (Ubuntu/Debian):** 
+```bash 
+chmod +x scripts/fetch_mpv_linux.sh 
+./scripts/fetch_mpv_linux.sh 
+``` 
 
-## 🎮 Управление
+**Linux (Arch/Manjaro):** 
+```bash 
+chmod +x scripts/fetch_mpv_arch.sh 
+./scripts/fetch_mpv_arch.sh 
+```
 
-### Клавиатура и мышь
-- **Добавить треки**: кнопка "Добавить"
-- **Воспроизведение**: кнопка Play/Pause
-- **Переключение треков**: кнопки "Следующий"/"Предыдущий"
-- **Громкость**: ползунок громкости
-- **Случайный режим**: переключатель "Random"
+3. **Assemble the project:** 
+```bash 
+mkdir build && cd build 
+cmake .. -G "Ninja Multi-Config" -DCMAKE_BUILD_TYPE=Release 
+cmake --build . --config Release
+```
 
-### Системные медиа-клавиши (Windows)
-- **Play/Pause**: `VK_MEDIA_PLAY_PAUSE` (Fn+F11, кнопка на гарнитуре)
-- **Следующий трек**: `VK_MEDIA_NEXT_TRACK` (Fn+F12)
-- **Предыдущий трек**: `VK_MEDIA_PREV_TRACK` (Fn+F10)
-- **Стоп**: `VK_MEDIA_STOP` (Fn+F9)
+4. **Run:**
+```bash
+# Windows
+./TextRedactor.exe
 
-> 💡 **Совет**: Медиа-клавиши работают глобально, даже когда окно не в фокусе!
+# Linux
+./TextRedactor
+```
 
-## 📁 Структура проекта
+## 🎮 Controls
+
+### Keyboard and Mouse
+- **Add Tracks**: "Add" button
+- **Playback**: Play/Pause button
+- **Switch Tracks**: "Next"/"Previous" buttons
+- **Volume**: Volume slider
+- **Random Mode**: "Random" toggle
+
+### System Media Keys (Windows)
+- **Play/Pause**: `VK_MEDIA_PLAY_PAUSE` (Fn+F11, headset button)
+- **Next Track**: `VK_MEDIA_NEXT_TRACK` (Fn+F12)
+- **Previous track**: `VK_MEDIA_PREV_TRACK` (Fn+F10)
+- **Stop**: `VK_MEDIA_STOP` (Fn+F9)
+
+> 💡 **Tip**: Media keys work globally, even when the window is out of focus!
+
+## 📁 Project Structure
 
 ```
 TextRedactor/
 ├── src/
-│   ├── model/              # Модели данных
-│   │   ├── track.h/cpp     # Класс трека
-│   │   └── ...
-│   ├── view/               # Пользовательский интерфейс
-│   │   ├── mainwindow.h/cpp # Главное окно
-│   │   └── mainwindow.ui   # UI файл
-│   ├── controller/         # Бизнес-логика
-│   │   ├── playercontroller.h/cpp    # Контроллер плеера
-│   │   └── durationcontroller.h/cpp  # Получение длительности треков
-│   ├── player/             # Плеер (mpv)
-│   │   └── player.h/cpp
-│   └── integration/        # Системная интеграция
-│       └── mediaosd.h/cpp  # OSD уведомления
-├── mpv/                    # mpv библиотеки и заголовки
-├── resources/              # Ресурсы (изображения, иконки)
-├── scripts/                # Скрипты установки зависимостей
-├── tests/                  # Модульные тесты
+│ ├── model/ # Data Models
+│ │ ├── track.h/cpp # Track Class
+│ │ └── ...
+│ ├── view/ # User Interface
+│ │ ├── mainwindow.h/cpp # Main Window
+│ │ └── mainwindow.ui # UI File
+│ ├── controller/ # Business Logic
+│ │ ├── playercontroller.h/cpp # Player Controller
+│ │ └── durationcontroller.h/cpp # Getting track durations
+│ ├── player/ # Player (mpv)
+│ │ └── player.h/cpp
+│ └── integration/ # System integration
+│ └── mediaosd.h/cpp # OSD notifications
+├── mpv/ # mpv libraries and headers
+├── resources/ # Resources (images, icons)
+├── scripts/ # Dependency installation scripts
+├── tests/ # Unit tests
 ├── CMakeLists.txt
 └── README.md
 ```
 
-## 🧪 Тестирование
+## 🧪 Testing
 
-Проект включает модульные тесты для всех основных компонентов:
+The project includes unit tests for all major components:
 
-### Запуск тестов
+### Running Tests
 
 ```bash
-# После сборки проекта
+# After Building the Project
 cd build/tests
 
 # Windows
 ./test_player.exe
-./test_playercontroller.exe  
+./test_playercontroller.exe
 ./test_track.exe
 
 # Linux
@@ -141,40 +140,28 @@ cd build/tests
 ./test_track
 ```
 
-### Покрытие тестами
-- ✅ **Player**: воспроизведение, пауза, громкость, позиция
-- ✅ **PlayerController**: управление плейлистом, переключение треков
-- ✅ **Track**: создание и валидация треков
+### Test Coverage
+- ✅ **Player**: Play, Pause, Volume, Position
+- ✅ **PlayerController**: Playlist Management, Track Switching
+- ✅ **Track**: Track Creation and Validation
 
-## 🔧 Технические детали
+## 🔧 Technical Details
 
-### Архитектура
-- **MVC паттерн**: четкое разделение Model-View-Controller
-- **Qt сигналы/слоты**: асинхронная коммуникация между компонентами
-- **Многопоточность**: получение длительности треков в отдельном потоке
-- **Системная интеграция**: глобальные горячие клавиши Windows
+### Architecture
+- **MVC Pattern**: Clear Model-View-Controller Separation
+- **Qt Signals/Slots**: Asynchronous Communication between Components
+- **Multithreading**: Track duration retrieval in a separate thread
+- **System Integration**: Global Windows hotkeys
 
-### Производительность
-- **Потокобезопасность**: корректная работа с Qt потоками
-- **Память**: автоматическое управление через smart pointers
-- **mpv интеграция**: эффективное воспроизведение через libmpv
+### Performance
+- **Thread Safety**: Correct work with Qt threads
+- **Memory**: Automatic management via smart pointers
+- **mpv Integration**: Efficient playback via libmpv
 
-### Скрипты установки mpv
+### mpv Installation Scripts
 
-| Дистрибутив | Скрипт | Метод установки |
+| Distribution | Script | Installation Method |
 |-------------|--------|-----------------|
-| **Windows** | `fetch_mpv_win.ps1` | Скачивание готовых DLL из mpv-winbuild |
-| **Ubuntu/Debian** | `fetch_mpv_linux.sh` | Установка через `apt-get` (libmpv-dev) |
-| **Arch/Manjaro** | `fetch_mpv_arch.sh` | Установка через `pacman` + копирование библиотек |
-
-> 💡 **Совет**: Если ваш дистрибутив не поддерживается, установите `libmpv-dev` вручную
-
-## 📄 Лицензия
-
-Этот проект распространяется под лицензией MIT. См. файл [LICENSE](LICENSE) для подробностей.
-
----
-
-**Создано с ❤️ на Qt и C++**
-
-
+| **Windows** | `fetch_mpv_win.ps1` | Downloading pre-built DLLs from mpv-winbuild |
+| **Ubuntu/Debian** | `fetch_mpv_linux.sh` | Installation via `apt-get` (libmpv-dev) |
+| **Arch/Manjaro** | `fetch_mpv_arch.sh` | Us
